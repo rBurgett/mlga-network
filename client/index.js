@@ -10,7 +10,7 @@ window.handleError = err => {
 const AppRouter = () => {
     return (
         <Router>
-            <div>
+            <div style={{overflowX: 'hidden'}}>
                 <Route path={'/'} exact={true} component={App} />
                 <Route path={'/channel/:id'} component={App} />
             </div>
