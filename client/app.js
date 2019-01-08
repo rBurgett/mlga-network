@@ -70,7 +70,7 @@ class App extends React.Component {
             <div className={'container-fluid'}>
                 <div className={'row'}>
                     <div className={'col'}>
-                        <h1 className={'text-center'} style={{marginBottom: 15}}>{'MLGA Po\'odcast® Network'}</h1>
+                        <h1 className={'text-center'} style={{marginBottom: 15}}>{'MLGA Pødcast Network'}</h1>
                     </div>
                 </div>
                 <div className={'row'}>
