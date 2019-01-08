@@ -101,7 +101,7 @@ const app = express()
         res.send(indexHTML);
     });
 
-const port = process.env.PORT || 3300;
+const port = process.env.PORT || 3500;
 
 const server = app.listen(port, () => {
     console.log('App listening at port', server.address().port);
