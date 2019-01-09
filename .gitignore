@@ -63,4 +63,5 @@ typings/
 .idea
 feeds.json
 /data
+/public/js/index.js
 /public2

@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { secureImagePath } from '../util';
+import { secureUrl } from '../util';
 
 const SidebarItem = ({ feed }) => {
     // const to = `/channel/${encodeURIComponent(feed.feedUrl)}`;
     return (
         <a href={feed.link} target={'none'} className={'list-group-item'}>
              <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start'}}>
-                 <img alt={feed.title} src={secureImagePath(feed.image.url)} style={{minWidth: 50, width: 50, height: 50}}></img>
+                 <img alt={feed.title} src={secureUrl(feed.image.url)} style={{minWidth: 50, width: 50, height: 50}}></img>
                  <div style={{marginLeft: 15}}>
                      <h4 style={{lineHeight: '50px', marginTop: 0, marginBottom: 0}}>{feed.title}</h4>
                  </div>

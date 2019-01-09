@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import uniq from 'lodash/uniq';
 import bindAll from 'lodash/bindAll';
 import ReactPlayer from 'react-player';
-import { secureImagePath } from '../util';
+import { secureUrl } from '../util';
 
 class Episode extends React.Component {
 
@@ -43,12 +42,12 @@ class Episode extends React.Component {
 
         return (
             <div style={styles.flexContainer}>
-                <img alt={feed.title} src={secureImagePath(feed.image.url)} style={styles.col1}></img>
+                <img alt={feed.title} src={secureUrl(feed.image.url)} style={styles.col1}></img>
                 <div style={styles.col2}>
                     <h3 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => this.props.play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h3>
                     <div>{formattedDate} - {episode.contentSnippet}</div>
                     {expanded ?
-                        <ReactPlayer url={episode.enclosure.url} onEnded={this.props.ended} controls={true} height={60} playing={true} />
+                        <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={this.props.ended} controls={true} height={60} playing={true} />
                         :
                         <div></div>
                     }
