@@ -105,8 +105,6 @@ class Episodes extends React.Component {
 
     render() {
 
-        console.log('Episodes state', this.state);
-
         const { expanded } = this.state;
         const { feeds, episodes } = this.props;
         const feedsMap = feeds.reduce((map, f) => {
