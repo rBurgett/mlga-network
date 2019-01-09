@@ -97,6 +97,7 @@ const app = express()
         });
     })
     .use(express.static('public'))
+    .use(express.static('public2'))
     .get('*', (req, res) => {
         const indexHTML = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
         res.send(indexHTML);
