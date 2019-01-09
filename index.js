@@ -9,6 +9,7 @@ const Parser = require('rss-parser');
 const path = require('path');
 
 fs.ensureDirSync('data');
+fs.ensureDirSync('public2');
 
 const db = {
     feeds: new DataStore({ filename: path.join(__dirname, 'data', 'feeds.db'), autoload: true }),
