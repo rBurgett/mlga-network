@@ -75,10 +75,10 @@ class App extends React.Component {
                 </div>
                 {feeds.length > 0 ?
                     <div className={'row'}>
-                        <div className={'col-lg-3 col-md-5'}>
+                        <div className={'col-lg-4 col-md-6'}>
                             <Sidebar feeds={feeds} />
                         </div>
-                        <div className={'col-lg-9 col-md-7'}>
+                        <div className={'col-lg-8 col-md-6'}>
                             <Episodes feeds={feeds} episodes={episodes} />
                             <div style={{marginBottom: 15, display: episodes.length > 0 ? 'block' : 'none'}}>
                                 <button type={'button'} className={'btn btn-outline-secondary'} style={{display: 'block', margin: 'auto'}} onClick={this.loadMore}>Load More</button>

@@ -10,7 +10,7 @@ const SidebarItem = ({ feed }) => {
              <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start'}}>
                  <img alt={feed.title} src={secureUrl(feed.image.url)} style={{minWidth: 50, width: 50, height: 50}}></img>
                  <div style={{marginLeft: 15}}>
-                     <h4 style={{lineHeight: '50px', marginTop: 0, marginBottom: 0}}>{feed.title}</h4>
+                     <h4 style={{fontSize: 14, lineHeight: '50px', marginTop: 0, marginBottom: 0}}>{feed.title}</h4>
                  </div>
              </div>
          </a>
