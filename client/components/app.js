@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import request from 'superagent';
 import bindAll from 'lodash/bindAll';
 import Sidebar from './sidebar';
@@ -62,9 +63,10 @@ class App extends React.Component {
 
     render() {
 
-        console.log(this.state);
+        console.log('state', this.state);
 
-        const { feeds, episodes } = this.state;
+        const { feeds, episodes, quantity } = this.state;
+        const { match } = this.props;
 
         return (
             <div className={'container-fluid'}>
@@ -79,7 +81,7 @@ class App extends React.Component {
                             <Sidebar feeds={feeds} />
                         </div>
                         <div className={'col-lg-8 col-md-6'}>
-                            <Episodes feeds={feeds} episodes={episodes} />
+                            <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} />
                             <div style={{marginBottom: 15, display: episodes.length > 0 ? 'block' : 'none'}}>
                                 <button type={'button'} className={'btn btn-outline-secondary'} style={{display: 'block', margin: 'auto'}} onClick={this.loadMore}>Load More</button>
                             </div>
@@ -93,5 +95,8 @@ class App extends React.Component {
     }
 
 }
+App.propTypes = {
+    match: PropTypes.object
+};
 
 export default App;

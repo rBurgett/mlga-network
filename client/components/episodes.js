@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { Map } from 'immutable';
 import bindAll from 'lodash/bindAll';
 import ReactPlayer from 'react-player';
+import request from 'superagent';
 import { secureUrl } from '../util';
 
 class Episode extends React.Component {
@@ -70,12 +72,32 @@ class Episodes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            expanded: ''
+            expanded: '',
+            episodes: []
         };
         bindAll(this, [
+            'loadEpisodes',
             'onPlay',
             'onEnded'
         ]);
+    }
+
+    loadEpisodes(quantity, feed) {
+        request.get(`/api/episodes?q=${quantity}&f=${encodeURIComponent(feed)}`)
+            .then(({ text }) => {
+                const episodes = JSON.parse(text);
+                this.setState({
+                    ...this.state,
+                    episodes
+                });
+            })
+            .catch(handleError);
+    }
+
+    UNSAFE_componentWillReceiveProps(newProps) {
+        if(newProps.feedId && (this.state.episodes.length === 0 || newProps.feedId !== this.props.feedId || newProps.quantity !== this.props.quantity)) {
+            this.loadEpisodes(newProps.quantity, newProps.feedId);
+        }
     }
 
     onPlay(e, guid) {
@@ -88,7 +110,7 @@ class Episodes extends React.Component {
 
     onEnded() {
         const { expanded } = this.state;
-        const { episodes } = this.props;
+        const episodes = this.props.feedId ? this.state.episodes : this.props.episodes;
         const idx = episodes.findIndex(e => e.guid === expanded);
         if(idx > 0) {
             this.setState({
@@ -106,15 +128,25 @@ class Episodes extends React.Component {
     render() {
 
         const { expanded } = this.state;
-        const { feeds, episodes } = this.props;
+        const { feedId, feeds, episodes } = this.props;
         const feedsMap = feeds.reduce((map, f) => {
-            map.set(f.feedUrl, f);
-            return map;
-        }, new Map());
+            return map.set(f.feedUrl, f);
+        }, Map());
+
+        const episodesToUse = !feedId ? episodes : this.state.episodes.length === 0 ? this.state.episodes : this.state.episodes[0].feedUrl === feedId ? this.state.episodes : [];
 
         return (
             <div>
-                {episodes.map(e => {
+                {feedId ?
+                    <div>
+                        <h2 style={{marginTop: 0}}>{feedsMap.get(feedId).title}</h2>
+                        <p><a href={feedsMap.get(feedId).link} target={'_blank'}>{feedsMap.get(feedId).link}</a></p>
+                        <p>{feedsMap.get(feedId).description}</p>
+                    </div>
+                    :
+                    <div></div>
+                }
+                {episodesToUse.map(e => {
                     return (
                         <Episode key={e.guid} episode={e} feed={feedsMap.get(e.feedUrl)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
                     );
@@ -125,8 +157,10 @@ class Episodes extends React.Component {
 
 }
 Episodes.propTypes = {
+    feedId: PropTypes.string,
     feeds: PropTypes.arrayOf(PropTypes.object),
-    episodes: PropTypes.arrayOf(PropTypes.object)
+    episodes: PropTypes.arrayOf(PropTypes.object),
+    quantity: PropTypes.number
 };
 
 export default Episodes;
