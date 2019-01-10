@@ -47,7 +47,7 @@ class Episode extends React.Component {
                     <h3 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => this.props.play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h3>
                     <div>{formattedDate} - {episode.contentSnippet}</div>
                     {expanded ?
-                        <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={this.props.ended} controls={true} height={60} playing={true} />
+                        <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={this.props.ended} controls={true} height={60} playing={true} disabledPlayers={['SoundCloud']} />
                         :
                         <div></div>
                     }
