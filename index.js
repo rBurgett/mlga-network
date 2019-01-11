@@ -119,7 +119,7 @@ const app = express()
     .use(express.static('public2'))
     .get('/', (req, res) => {
         const indexHTML = baseIndexHTML
-            .replace(/{{title}}/g, 'MLGA Network"')
+            .replace(/{{title}}/g, 'MLGA Network')
             .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
             .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
             .replace(/{{imageWidth}}/g, '1024')
