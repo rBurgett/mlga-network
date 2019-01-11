@@ -65,3 +65,4 @@ feeds.json
 /data
 /public/js/index.js
 /public2
+.env.json

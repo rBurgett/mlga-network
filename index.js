@@ -90,6 +90,7 @@ const app = express()
                 res.sendStatus(500);
             } else {
                 const preppedDocs = docs
+                    .filter(d => d.enclosure ? true : false)
                     .sort((a, b) => a.isoDate === b.isoDate ? 0 : a.isoDate > b.isoDate ? -1 : 1)
                     .slice(0, q);
                 res.send(JSON.stringify(preppedDocs));
