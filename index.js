@@ -4,12 +4,17 @@ const express = require('express');
 const favicon = require('serve-favicon');
 const fs = require('fs-extra-promise');
 const multipart = require('connect-multiparty');
+const escape = require('lodash/escape');
 const omit = require('lodash/omit');
 const Parser = require('rss-parser');
 const path = require('path');
 
 fs.ensureDirSync('data');
 fs.ensureDirSync('public2');
+
+const secureUrl = (url = '') => {
+    return url.replace(/^http:/, 'https:');
+};
 
 const db = {
     feeds: new DataStore({ filename: path.join(__dirname, 'data', 'feeds.db'), autoload: true }),
@@ -23,9 +28,8 @@ const updateFeeds = async function() {
     try {
         for(const feedUrl of feeds) {
             const feed = await parser.parseURL(feedUrl);
-            const items = [
-                ...feed.items
-            ];
+            const items = [...feed.items]
+                .filter(i => i.enclosure ? true : false);
             const meta = omit(feed, ['items']);
             await new Promise((resolve, reject) => {
                 db.feeds.update({ feedUrl: feed.feedUrl }, meta, { upsert: true }, err => {
@@ -63,6 +67,8 @@ const updateFeeds = async function() {
 updateFeeds();
 setInterval(updateFeeds, 1800000);
 
+const baseIndexHTML = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+
 const app = express()
     .use(bodyParser.json())
     .use(bodyParser.urlencoded({ extended: true }))
@@ -99,9 +105,38 @@ const app = express()
     })
     .use(express.static('public'))
     .use(express.static('public2'))
-    .get('*', (req, res) => {
-        const indexHTML = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    .get('/', (req, res) => {
+        const indexHTML = baseIndexHTML
+            .replace(/{{title}}/g, 'MLGA Network"')
+            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
+            .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
+            .replace(/{{imageWidth}}/g, '1024')
+            .replace(/{{imageHeight}}/g, '1024')
+            .replace(/{{uri}}/g, '');
         res.send(indexHTML);
+    })
+    .get('/channel/:feedUrl', (req, res) => {
+        const { feedUrl } = req.params;
+        db.feeds.findOne({ feedUrl }, (err, feed) => {
+            if(err) {
+                console.error(err);
+                res.sendStatus(500);
+            } else if(!feed) {
+                res.sendStatus(404);
+            } else {
+                const indexHTML = baseIndexHTML
+                    .replace(/{{title}}/g, escape(feed.title))
+                    .replace(/{{description}}/g, escape(`Listen to ${feed.title} on the MLGA Pødcast Network.`))
+                    .replace(/{{image}}/g, secureUrl(feed.image.url))
+                    .replace(/{{imageWidth}}/g, '')
+                    .replace(/{{imageHeight}}/g, '')
+                    .replace(/{{uri}}/g, `/${encodeURIComponent(feedUrl)}`);
+                res.send(indexHTML);
+            }
+        });
+    })
+    .get('*', (req, res) => {
+        res.sendStatus(404);
     });
 
 const port = process.env.PORT || 3500;
