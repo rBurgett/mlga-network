@@ -31,6 +31,11 @@ const updateFeeds = async function() {
             const items = [...feed.items]
                 .filter(i => i.enclosure ? true : false);
             const meta = omit(feed, ['items']);
+
+            if(/godarchy\.org/.test(feed.feedUrl)) {
+                feed.image.url = 'https://www.godarchy.org/wp-content/uploads/2016/10/godarchy-yellow.jpg';
+            }
+
             await new Promise((resolve, reject) => {
                 db.feeds.update({ feedUrl: feed.feedUrl }, meta, { upsert: true }, err => {
                     if(err) reject(err);
