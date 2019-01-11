@@ -8,12 +8,13 @@ const escape = require('lodash/escape');
 const omit = require('lodash/omit');
 const Parser = require('rss-parser');
 const path = require('path');
-const request = require('superagent');
+// const request = require('superagent');
+const RSS = require('rss');
 
 fs.ensureDirSync('data');
 fs.ensureDirSync('public2');
 
-const { pageId, accessToken } = fs.readJsonSync('.env.json');
+// const { pageId, accessToken } = fs.readJsonSync('.env.json');
 
 const secureUrl = (url = '') => {
     return url.replace(/^http:/, 'https:');
@@ -57,11 +58,12 @@ const updateFeeds = async function() {
                                 if(err1) {
                                     reject(err1);
                                 } else {
-                                    const message = `"${i.title}" from ${feed.title} is now available on the MLGA Pødcast Network.`;
-                                    const link = `https://mlganetwork.com/channel/${encodeURIComponent(feed.feedUrl)}`;
-                                    request.post(`https://graph.facebook.com/${pageId}/feed?message=${encodeURIComponent(message)}&link=${encodeURIComponent(link)}&access_token=${accessToken}`)
-                                        .then(() => resolve())
-                                        .catch(() => resolve());
+                                    resolve();
+                                    // const message = `"${i.title}" from ${feed.title} is now available on the MLGA Pødcast Network.`;
+                                    // const link = `https://mlganetwork.com/channel/${encodeURIComponent(feed.feedUrl)}`;
+                                    // request.post(`https://graph.facebook.com/${pageId}/feed?message=${encodeURIComponent(message)}&link=${encodeURIComponent(link)}&access_token=${accessToken}`)
+                                    //     .then(() => resolve())
+                                    //     .catch(() => resolve());
                                 }
                             });
                         }
@@ -114,6 +116,41 @@ const app = express()
                 res.send(JSON.stringify(preppedDocs));
             }
         });
+    })
+    .get('/rss', async function(req, res) {
+        try {
+            const docs = await new Promise((resolve, reject) => {
+                db.episodes.find({}, (err, data) => {
+                    if(err) reject(err);
+                    else resolve(data);
+                });
+            });
+            const episodes = docs
+                .filter(d => d.enclosure ? true : false)
+                .sort((a, b) => a.isoDate === b.isoDate ? 0 : a.isoDate > b.isoDate ? -1 : 1)
+                .slice(0, 40);
+            const feed = new RSS({
+                title: 'MLGA Pødcast Network',
+                description: 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.',
+                feed_url: 'https://mlganetwork.com/rss',
+                site_url: 'https://mlganetwork.com',
+                image_url: 'https://mlganetwork.com/images/mlga-network.jpg',
+                managingEditor: 'Ryan Burgett',
+                webMaster: 'Ryan Burgett',
+                copyright: '',
+                langauge: 'en',
+                categories: ['freedom', 'liberty', 'economics', 'history', 'fun'],
+                pubDate: episodes[0].isoDate
+            });
+            for(const episode of episodes) {
+                feed.item(omit(episode, ['feedUrl']));
+            }
+            res.set('Content-Type', 'application/rss+xml');
+            res.send(feed.xml({indent: '  '}));
+        } catch(err) {
+            console.error(err);
+            res.sendStatus(500);
+        }
     })
     .use(express.static('public'))
     .use(express.static('public2'))
