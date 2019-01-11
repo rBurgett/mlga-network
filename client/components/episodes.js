@@ -86,10 +86,12 @@ class Episodes extends React.Component {
         request.get(`/api/episodes?q=${quantity}&f=${encodeURIComponent(feed)}`)
             .then(({ text }) => {
                 const episodes = JSON.parse(text);
-                this.setState({
-                    ...this.state,
-                    episodes
-                });
+                setTimeout(() => {
+                    this.setState({
+                        ...this.state,
+                        episodes
+                    });
+                }, 0);
             })
             .catch(handleError);
     }
