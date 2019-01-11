@@ -130,7 +130,7 @@ const app = express()
                     .replace(/{{image}}/g, secureUrl(feed.image.url))
                     .replace(/{{imageWidth}}/g, '')
                     .replace(/{{imageHeight}}/g, '')
-                    .replace(/{{uri}}/g, `/${encodeURIComponent(feedUrl)}`);
+                    .replace(/{{uri}}/g, `/channel/${encodeURIComponent(feedUrl)}`);
                 res.send(indexHTML);
             }
         });
