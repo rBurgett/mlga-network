@@ -8,9 +8,12 @@ const escape = require('lodash/escape');
 const omit = require('lodash/omit');
 const Parser = require('rss-parser');
 const path = require('path');
+const request = require('superagent');
 
 fs.ensureDirSync('data');
 fs.ensureDirSync('public2');
+
+const { pageId, accessToken } = fs.readJsonSync('.env.json');
 
 const secureUrl = (url = '') => {
     return url.replace(/^http:/, 'https:');
@@ -54,7 +57,11 @@ const updateFeeds = async function() {
                                 if(err1) {
                                     reject(err1);
                                 } else {
-                                    resolve();
+                                    const message = `"${i.title}" from ${feed.title} is now available on the MLGA Pødcast Network.`;
+                                    const link = `https://mlganetwork.com/channel/${encodeURIComponent(feed.feedUrl)}`;
+                                    request.post(`https://graph.facebook.com/${pageId}/feed?message=${encodeURIComponent(message)}&link=${encodeURIComponent(link)}&access_token=${accessToken}`)
+                                        .then(() => resolve())
+                                        .catch(() => resolve());
                                 }
                             });
                         }
