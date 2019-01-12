@@ -144,7 +144,14 @@ const app = express()
                 itunesOwner: {
                     name: 'Ryan Burgett',
                     email: 'ryan@burgetweb.net'
-                }
+                },
+                itunesCategory: [
+                    {text: 'News & Politics'},
+                    {text: 'Government & Organizations'},
+                    {text: 'Society & Culture'}
+                ],
+                itunesLanguage: 'en',
+                itunesExplicit: true
             });
             for(const episode of episodes) {
                 const { itunes = {} } = episode;

@@ -38,7 +38,7 @@
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "nedb": "^1.8.0",
-    "podcast": "^1.1.0",
+    "podcast": "git+https://github.com/rBurgett/node-podcast.git#itunes_language",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
