@@ -153,11 +153,7 @@ const app = express()
                     {text: 'Society & Culture'}
                 ],
                 itunesImage: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
-                itunesExplicit: true,
-                customElements: [
-                    {'googleplay:email': '![CDATA[ryan@burgettweb.net]]'},
-                    {'googleplay:author': '![CDATA[Ryan Burgett]]'}
-                ]
+                itunesExplicit: true
             });
             for(const episode of episodes) {
                 const { itunes = {} } = episode;
