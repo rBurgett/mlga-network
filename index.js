@@ -138,7 +138,7 @@ const app = express()
                 managingEditor: 'ryan@burgettweb.net (Ryan Burgett)',
                 webMaster: 'ryan@burgettweb.net (Ryan Burgett)',
                 copyright: '',
-                langauge: 'en',
+                language: 'en',
                 categories: ['freedom', 'liberty', 'economics', 'history', 'fun'],
                 pubDate: episodes[0].isoDate,
                 itunesOwner: {
@@ -150,7 +150,6 @@ const app = express()
                     {text: 'Government & Organizations'},
                     {text: 'Society & Culture'}
                 ],
-                itunesLanguage: 'en',
                 itunesExplicit: true
             });
             for(const episode of episodes) {
