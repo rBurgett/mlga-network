@@ -135,12 +135,16 @@ const app = express()
                 feed_url: 'https://mlganetwork.com/rss',
                 site_url: 'https://mlganetwork.com',
                 image_url: 'https://mlganetwork.com/images/mlga-network.jpg',
-                managingEditor: 'Ryan Burgett',
-                webMaster: 'Ryan Burgett',
+                managingEditor: 'ryan@burgettweb.net',
+                webMaster: 'ryan@burgettweb.net',
                 copyright: '',
                 langauge: 'en',
                 categories: ['freedom', 'liberty', 'economics', 'history', 'fun'],
-                pubDate: episodes[0].isoDate
+                pubDate: episodes[0].isoDate,
+                itunesOwner: {
+                    name: 'Ryan Burgett',
+                    email: 'ryan@burgetweb.net'
+                }
             });
             for(const episode of episodes) {
                 const { itunes = {} } = episode;
