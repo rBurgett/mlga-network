@@ -141,6 +141,8 @@ const app = express()
                 language: 'en',
                 categories: ['freedom', 'liberty', 'economics', 'history', 'fun'],
                 pubDate: episodes[0].isoDate,
+                itunesAuthor: 'Ryan Burgett',
+                itunesEmail: 'ryan@burgettweb.net',
                 itunesOwner: {
                     name: 'Ryan Burgett',
                     email: 'ryan@burgetweb.net'
