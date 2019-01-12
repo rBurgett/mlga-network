@@ -132,7 +132,7 @@ const app = express()
             const feed = new Feed({
                 title: 'MLGA Pødcast Network',
                 description: 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.',
-                feed_url: 'https://mlganetwork.com/rss',
+                feed_url: 'https://mlganetwork.com/audio/rss',
                 site_url: 'https://mlganetwork.com',
                 image_url: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
                 managingEditor: 'ryan@burgettweb.net (Ryan Burgett)',
