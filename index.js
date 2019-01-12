@@ -134,7 +134,7 @@ const app = express()
                 description: 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.',
                 feed_url: 'https://mlganetwork.com/rss',
                 site_url: 'https://mlganetwork.com',
-                image_url: 'https://mlganetwork.com/images/mlga-network.jpg',
+                image_url: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
                 managingEditor: 'ryan@burgettweb.net (Ryan Burgett)',
                 webMaster: 'ryan@burgettweb.net (Ryan Burgett)',
                 copyright: '',
@@ -150,6 +150,7 @@ const app = express()
                     {text: 'Government & Organizations'},
                     {text: 'Society & Culture'}
                 ],
+                itunesImage: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
                 itunesExplicit: true
             });
             for(const episode of episodes) {
