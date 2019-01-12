@@ -156,7 +156,7 @@ const app = express()
                 itunesExplicit: true,
                 customElements: [
                     {'googleplay:email': 'ryan@burgettweb.net'},
-                    {'googleplay:author': 'ryan@burgettweb.net'}
+                    {'googleplay:author': 'Ryan Burgett'}
                 ]
             });
             for(const episode of episodes) {
