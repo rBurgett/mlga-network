@@ -155,7 +155,8 @@ const app = express()
                 itunesImage: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
                 itunesExplicit: true,
                 customElements: [
-                    {'itunes:email': 'ryan@burgettweb.net'}
+                    {'googleplay:email': 'ryan@burgettweb.net'},
+                    {'googleplay:author': 'ryan@burgettweb.net'}
                 ]
             });
             for(const episode of episodes) {
