@@ -153,7 +153,10 @@ const app = express()
                     {text: 'Society & Culture'}
                 ],
                 itunesImage: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
-                itunesExplicit: true
+                itunesExplicit: true,
+                customElements: [
+                    {'itunes:email': 'ryan@burgettweb.net'}
+                ]
             });
             for(const episode of episodes) {
                 const { itunes = {} } = episode;
