@@ -9,7 +9,7 @@ const omit = require('lodash/omit');
 const Parser = require('rss-parser');
 const path = require('path');
 // const request = require('superagent');
-const RSS = require('rss');
+const Feed = require('podcast');
 
 fs.ensureDirSync('data');
 fs.ensureDirSync('public2');
@@ -117,7 +117,7 @@ const app = express()
             }
         });
     })
-    .get('/rss', async function(req, res) {
+    .get('/audio/rss', async function(req, res) {
         try {
             const docs = await new Promise((resolve, reject) => {
                 db.episodes.find({}, (err, data) => {
@@ -129,7 +129,7 @@ const app = express()
                 .filter(d => d.enclosure ? true : false)
                 .sort((a, b) => a.isoDate === b.isoDate ? 0 : a.isoDate > b.isoDate ? -1 : 1)
                 .slice(0, 40);
-            const feed = new RSS({
+            const feed = new Feed({
                 title: 'MLGA Pødcast Network',
                 description: 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.',
                 feed_url: 'https://mlganetwork.com/rss',
@@ -143,10 +143,19 @@ const app = express()
                 pubDate: episodes[0].isoDate
             });
             for(const episode of episodes) {
-                feed.item(omit(episode, ['feedUrl']));
+                const { itunes = {} } = episode;
+                const preppedEpisode = Object.assign(
+                    {},
+                    omit(episode, ['feedUrl', 'itunes']),
+                    Object.keys(itunes).reduce((obj, key) => {
+                        obj['itunes' + key[0].toUpperCase() + key.slice(1)] = itunes[key];
+                        return obj;
+                    }, {})
+                );
+                feed.addItem(preppedEpisode);
             }
             res.set('Content-Type', 'application/rss+xml');
-            res.send(feed.xml({indent: '  '}));
+            res.send(feed.buildXml('  '));
         } catch(err) {
             console.error(err);
             res.sendStatus(500);
