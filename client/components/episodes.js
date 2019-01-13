@@ -38,7 +38,8 @@ class Episode extends React.Component {
                 marginRight: 15
             },
             col2: {
-                flexGrow: 1
+                flexGrow: 1,
+                overflowX: 'hidden'
             }
         };
 
@@ -139,20 +140,25 @@ class Episodes extends React.Component {
 
         return (
             <div>
-                {feedId ?
-                    <div>
-                        <h2 style={{marginTop: 0}}>{feedsMap.get(feedId).title}</h2>
-                        <p><a href={feedsMap.get(feedId).link} target={'_blank'}>{feedsMap.get(feedId).link}</a></p>
-                        <p>{feedsMap.get(feedId).description}</p>
-                    </div>
-                    :
-                    <div></div>
-                }
-                {episodesToUse.map(e => {
-                    return (
-                        <Episode key={e.guid} episode={e} feed={feedsMap.get(e.feedUrl)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
-                    );
-                })}
+                <div>
+                    {feedId ?
+                        <div>
+                            <h2 style={{marginTop: 0}}>{feedsMap.get(feedId).title}</h2>
+                            <p><a href={feedsMap.get(feedId).link} target={'_blank'}>{feedsMap.get(feedId).link}</a></p>
+                            <p>{feedsMap.get(feedId).description}</p>
+                        </div>
+                        :
+                        <div></div>
+                    }
+                    {episodesToUse.map(e => {
+                        return (
+                            <Episode key={e.guid} episode={e} feed={feedsMap.get(e.feedUrl)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
+                        );
+                    })}
+                </div>
+                <div style={{marginBottom: 20, display: episodesToUse.length > 0 ? 'block' : 'none'}}>
+                    <button type={'button'} className={'btn btn-outline-secondary'} style={{display: 'block', margin: 'auto'}} onClick={this.props.loadMore}>Load More</button>
+                </div>
             </div>
         );
     }
@@ -162,7 +168,8 @@ Episodes.propTypes = {
     feedId: PropTypes.string,
     feeds: PropTypes.arrayOf(PropTypes.object),
     episodes: PropTypes.arrayOf(PropTypes.object),
-    quantity: PropTypes.number
+    quantity: PropTypes.number,
+    loadMore: PropTypes.func
 };
 
 export default Episodes;

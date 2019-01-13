@@ -69,27 +69,26 @@ class App extends React.Component {
         const { match } = this.props;
 
         return (
-            <div className={'container-fluid'}>
-                <div className={'row'}>
-                    <div className={'col'}>
-                        <h1 className={'text-center'} style={{marginBottom: 15}}>{'MLGA Pødcast Network'}</h1>
-                    </div>
-                </div>
-                {feeds.length > 0 ?
+            <div style={{flexGrow: 1, overflowY: 'auto'}}>
+                <div className={'container-fluid'}>
                     <div className={'row'}>
-                        <div className={'col-lg-4 col-md-6'}>
-                            <Sidebar feeds={feeds} />
+                        <div className={'col'}>
+                            <h1 className={'text-center'} style={{marginBottom: 15}}>{'MLGA Pødcast Network'}</h1>
                         </div>
-                        <div className={'col-lg-8 col-md-6'}>
-                            <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} />
-                            <div style={{marginBottom: 15, display: episodes.length > 0 ? 'block' : 'none'}}>
-                                <button type={'button'} className={'btn btn-outline-secondary'} style={{display: 'block', margin: 'auto'}} onClick={this.loadMore}>Load More</button>
+                    </div>
+                    {feeds.length > 0 ?
+                        <div className={'row'}>
+                            <div className={'col-lg-4 col-md-6'}>
+                                <Sidebar feeds={feeds} />
+                            </div>
+                            <div className={'col-lg-8 col-md-6'}>
+                                <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} loadMore={this.loadMore} />
                             </div>
                         </div>
-                    </div>
-                    :
-                    <div></div>
-                }
+                        :
+                        <div></div>
+                    }
+                </div>
             </div>
         );
     }
