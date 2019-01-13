@@ -6,7 +6,7 @@ import { secureUrl } from '../util';
 const SidebarItem = ({ feed }) => {
     const to = `/channel/${encodeURIComponent(feed.feedUrl)}`;
     return (
-        <Link to={to} className={'list-group-item'}>
+        <Link to={to} className={'list-group-item list-group-item-action'}>
              <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start'}}>
                  <img alt={feed.title} src={secureUrl(feed.image.url)} style={{minWidth: 50, width: 50, height: 50}}></img>
                  <div style={{marginLeft: 15}}>
@@ -22,8 +22,8 @@ SidebarItem.propTypes = {
 
 const Sidebar = ({ feeds }) => {
     return (
-        <div className={'list-group'}>
-            <Link className={'list-group-item'} to={'/'}>
+        <div className={'list-group'} style={{marginBottom: 20}}>
+            <Link className={'list-group-item list-group-item-action'} to={'/'}>
                 <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start'}}>
                     <div style={{width: 50, height: 50}}>
                         <i className="fas fa-home" style={{fontSize: 50}}></i>

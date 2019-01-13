@@ -5,8 +5,8 @@ const Footer = () => {
     const styles = {
         footerContainer: {
             width: '100%',
-            minHeight: 40,
-            height: 40,
+            minHeight: 50,
+            height: 50,
             backgroundColor: '#efefef',
             display: 'flex',
             flexDirecton: 'row',
@@ -18,7 +18,7 @@ const Footer = () => {
         designNote: {
             flexGrow: 1,
             textAlign: 'right',
-            lineHeight: '40px',
+            lineHeight: '50px',
             fontWeight: 'bold'
         }
     };

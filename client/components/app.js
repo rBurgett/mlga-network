@@ -73,15 +73,15 @@ class App extends React.Component {
                 <div className={'container-fluid'}>
                     <div className={'row'}>
                         <div className={'col'}>
-                            <h1 className={'text-center'} style={{marginBottom: 15}}>{'MLGA Pødcast Network'}</h1>
+                            <h1 className={'text-center'} style={{marginTop: 10, marginBottom: 15}}>{'MLGA Pødcast Network'}</h1>
                         </div>
                     </div>
                     {feeds.length > 0 ?
                         <div className={'row'}>
-                            <div className={'col-lg-4 col-md-6'}>
+                            <div className={'col-lg-4 col-md-12'}>
                                 <Sidebar feeds={feeds} />
                             </div>
-                            <div className={'col-lg-8 col-md-6'}>
+                            <div className={'col-lg-8 col-md-12'}>
                                 <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} loadMore={this.loadMore} />
                             </div>
                         </div>
