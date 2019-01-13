@@ -73,7 +73,7 @@ class App extends React.Component {
                 <div className={'container-fluid'}>
                     <div className={'row'}>
                         <div className={'col'}>
-                            <h1 className={'text-center'} style={{marginTop: 10, marginBottom: 15}}>{'MLGA Pødcast Network'}</h1>
+                            <h1 className={'text-center'} style={{marginTop: 20, marginBottom: 20}}>{'MLGA Pødcast Network'}</h1>
                         </div>
                     </div>
                     {feeds.length > 0 ?
