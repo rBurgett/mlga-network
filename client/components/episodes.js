@@ -39,7 +39,7 @@ class Episode extends React.Component {
             },
             col2: {
                 flexGrow: 1,
-                overflowX: 'hidden'
+                overflow: 'hidden'
             }
         };
 
