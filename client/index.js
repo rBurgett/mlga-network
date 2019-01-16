@@ -26,6 +26,8 @@ const AppRouter = () => {
         <Router>
             <div style={styles.container}>
                 <Route path={'/'} exact={true} component={App} />
+                <Route path={'/about'} exact={true} component={App} />
+                <Route path={'/contact'} exact={true} component={App} />
                 <Route path={'/channel/:id'} component={App} />
                 <Footer />
             </div>

@@ -4,6 +4,8 @@ import request from 'superagent';
 import bindAll from 'lodash/bindAll';
 import Sidebar from './sidebar';
 import Episodes from './episodes';
+import About from './about';
+import Contact from './contact';
 
 class App extends React.Component {
 
@@ -68,6 +70,8 @@ class App extends React.Component {
         const { feeds, episodes, quantity } = this.state;
         const { match } = this.props;
 
+        const path = match.path.toLowerCase();
+
         return (
             <div style={{flexGrow: 1, overflowY: 'auto'}}>
                 <div className={'container-fluid'}>
@@ -82,7 +86,14 @@ class App extends React.Component {
                                 <Sidebar feeds={feeds} />
                             </div>
                             <div className={'col-lg-8 col-md-12'}>
-                                <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} loadMore={this.loadMore} />
+                                {path === '/about' ?
+                                    <About />
+                                    :
+                                    path === '/contact' ?
+                                        <Contact />
+                                        :
+                                        <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} loadMore={this.loadMore} />
+                                }
                             </div>
                         </div>
                         :

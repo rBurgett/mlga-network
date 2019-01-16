@@ -186,6 +186,26 @@ const app = express()
             .replace(/{{uri}}/g, '');
         res.send(indexHTML);
     })
+    .get('/about', (req, res) => {
+        const indexHTML = baseIndexHTML
+            .replace(/{{title}}/g, 'About - MLGA Network')
+            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
+            .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
+            .replace(/{{imageWidth}}/g, '1024')
+            .replace(/{{imageHeight}}/g, '1024')
+            .replace(/{{uri}}/g, '');
+        res.send(indexHTML);
+    })
+    .get('/contact', (req, res) => {
+        const indexHTML = baseIndexHTML
+            .replace(/{{title}}/g, 'Contact - MLGA Network')
+            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
+            .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
+            .replace(/{{imageWidth}}/g, '1024')
+            .replace(/{{imageHeight}}/g, '1024')
+            .replace(/{{uri}}/g, '');
+        res.send(indexHTML);
+    })
     .get('/channel/:feedUrl', (req, res) => {
         const { feedUrl } = req.params;
         db.feeds.findOne({ feedUrl }, (err, feed) => {
@@ -196,7 +216,7 @@ const app = express()
                 res.sendStatus(404);
             } else {
                 const indexHTML = baseIndexHTML
-                    .replace(/{{title}}/g, escape(feed.title))
+                    .replace(/{{title}}/g, escape(feed.title + ' on MLGA Pødcast Network'))
                     .replace(/{{description}}/g, escape(`Listen to ${feed.title} on the MLGA Pødcast Network.`))
                     .replace(/{{image}}/g, secureUrl(feed.image.url))
                     .replace(/{{imageWidth}}/g, '')
