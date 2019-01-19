@@ -1,7 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { getWindowSize } from '../util';
 
-const Footer = () => {
+const Footer = ({ windowWidth }) => {
+
+    const windowSize = getWindowSize(windowWidth);
 
     const styles = {
         footerContainer: {
@@ -22,6 +27,7 @@ const Footer = () => {
             marginRight: 30
         },
         designNote: {
+            display: ['xs', 'sm'].includes(windowSize) ? 'none' : 'block',
             flexGrow: 1,
             textAlign: 'right',
             lineHeight: '50px',
@@ -40,5 +46,14 @@ const Footer = () => {
         </div>
     );
 };
+Footer.propTypes = {
+    windowWidth: PropTypes.number
+};
 
-export default Footer;
+const FooterContainer = connect(
+    ({ appState }) => ({
+        windowWidth: appState.windowWidth
+    })
+)(Footer);
+
+export default FooterContainer;

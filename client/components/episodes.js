@@ -6,69 +6,74 @@ import { Map } from 'immutable';
 import bindAll from 'lodash/bindAll';
 import ReactPlayer from 'react-player';
 import request from 'superagent';
-import { secureUrl } from '../util';
+import { secureUrl, getWindowSize } from '../util';
 import * as actions from '../actions';
 
-class Episode extends React.Component {
+let Episode = ({ feed, episode, expanded, windowWidth, play, ended }) => {
 
-    constructor(props) {
-        super(props);
-    }
+    const windowSize = getWindowSize(windowWidth);
 
-    render() {
+    const formattedDate = moment(episode.isoDate).format('MMMM D, YYYY');
 
-        const { feed, episode, expanded } = this.props;
+    const styles = {
+        flexContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'nowrap',
+            justifyContent: 'flex-start',
+            marginBottom: 20,
+            borderColor: '#ddd',
+            borderWidth: 1,
+            borderStyle: 'solid',
+            padding: 10
+        },
+        col1: {
+            minWidth: 100,
+            width: 100,
+            height: 100,
+            marginRight: 15
+        },
+        col2: {
+            flexGrow: 1,
+            overflow: 'hidden'
+        },
+        contentContainer: {}
+    };
 
-        const formattedDate = moment(episode.isoDate).format('MMMM D, YYYY');
+    styles.contentContainer = ['sm', 'xs'].includes(windowSize) ? {fontSize: 14} : styles.contentContainer;
 
-        const styles = {
-            flexContainer: {
-                display: 'flex',
-                flexDirection: 'row',
-                flexWrap: 'nowrap',
-                justifyContent: 'flex-start',
-                marginBottom: 20,
-                borderColor: '#ddd',
-                borderWidth: 1,
-                borderStyle: 'solid',
-                padding: 10
-            },
-            col1: {
-                minWidth: 100,
-                width: 100,
-                height: 100,
-                marginRight: 15
-            },
-            col2: {
-                flexGrow: 1,
-                overflow: 'hidden'
-            }
-        };
-
-        return (
-            <div style={styles.flexContainer}>
-                <img alt={feed.title} src={secureUrl(feed.image.url)} style={styles.col1}></img>
-                <div style={styles.col2}>
-                    <h3 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => this.props.play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h3>
-                    <div>{formattedDate} - {episode.contentSnippet}</div>
-                    {expanded ?
-                        <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={this.props.ended} controls={true} height={60} playing={true} disabledPlayers={['SoundCloud']} />
-                        :
-                        <div></div>
-                    }
-                </div>
+    return (
+        <div style={styles.flexContainer}>
+            <img alt={feed.title} src={secureUrl(feed.image.url)} style={styles.col1}></img>
+            <div style={styles.col2}>
+                {['sm', 'xs'].includes(windowSize) ?
+                    <h4 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h4>
+                    :
+                    <h3 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h3>
+                }
+                <div style={styles.contentContainer}>{formattedDate} - {episode.contentSnippet}</div>
+                {expanded ?
+                    <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={ended} controls={true} height={60} playing={true} disabledPlayers={['SoundCloud']} />
+                    :
+                    <div></div>
+                }
             </div>
-        );
-    }
-
-}
+        </div>
+    );
+};
 Episode.propTypes = {
     feed: PropTypes.object,
     episode: PropTypes.object,
     expanded: PropTypes.bool,
+    windowWidth: PropTypes.number,
     play: PropTypes.func,
     ended: PropTypes.func
 };
+Episode = connect(
+    ({ appState }) => ({
+        windowWidth: appState.windowWidth
+    })
+)(Episode);
 
 class Episodes extends React.Component {
 

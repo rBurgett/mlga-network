@@ -5,7 +5,9 @@ const getInitialState = () => ({
     feeds: [],
     episodes: [],
     feedEpisodes: Map(),
-    expanded: ''
+    expanded: '',
+    windowHeight: window.innerHeight,
+    windowWidth: window.innerWidth
 });
 
 export default (state = getInitialState(), { type, payload }) => {
