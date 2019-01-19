@@ -43,7 +43,9 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-player": "git+https://github.com/rBurgett/react-player.git#remove_soundcloud_player",
+    "react-redux": "^6.0.0",
     "react-router-dom": "^4.3.1",
+    "redux": "^4.0.1",
     "rss-parser": "^3.6.2",
     "serve-favicon": "^2.5.0",
     "superagent": "^4.1.0"

@@ -1,12 +1,35 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, IndexRoute } from 'react-router-dom';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
 import App from './components/app';
 import Footer from './components/footer';
+import appReducer from './reducer';
+import { setWindowSize } from './actions';
 
 window.handleError = err => {
     console.error(err);
 };
+
+const combinedReducers = combineReducers({
+    appState: appReducer
+});
+
+const store = createStore(combinedReducers);
+
+store.subscribe(() => {
+    const state = store.getState();
+    console.log('state', state.appState);
+});
+
+window.addEventListener('resize', e => {
+    const { innerWidth, innerHeight } = e.target;
+    store.dispatch(setWindowSize({
+        width: innerWidth,
+        height: innerHeight
+    }));
+});
 
 const AppRouter = () => {
 
@@ -23,15 +46,17 @@ const AppRouter = () => {
     };
 
     return (
-        <Router>
-            <div style={styles.container}>
-                <Route path={'/'} exact={true} component={App} />
-                <Route path={'/about'} exact={true} component={App} />
-                <Route path={'/contact'} exact={true} component={App} />
-                <Route path={'/channel/:id'} component={App} />
-                <Footer />
-            </div>
-        </Router>
+        <Provider store={store}>
+            <Router>
+                <div style={styles.container}>
+                    <Route path={'/'} exact={true} component={App} />
+                    <Route path={'/about'} component={App} />
+                    <Route path={'/contact'} component={App} />
+                    <Route path={'/channel/:id'} component={App} />
+                    <Footer />
+                </div>
+            </Router>
+        </Provider>
     );
 };
 

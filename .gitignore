@@ -66,3 +66,4 @@ feeds.json
 /public/js/index.js
 /public2
 .env.json
+package-lock.json

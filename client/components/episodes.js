@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import moment from 'moment';
 import { Map } from 'immutable';
 import bindAll from 'lodash/bindAll';
 import ReactPlayer from 'react-player';
 import request from 'superagent';
 import { secureUrl } from '../util';
+import * as actions from '../actions';
 
 class Episode extends React.Component {
 
@@ -72,10 +74,6 @@ class Episodes extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            expanded: '',
-            episodes: []
-        };
         bindAll(this, [
             'loadEpisodes',
             'onPlay',
@@ -87,56 +85,54 @@ class Episodes extends React.Component {
         request.get(`/api/episodes?q=${quantity}&f=${encodeURIComponent(feed)}`)
             .then(({ text }) => {
                 const episodes = JSON.parse(text);
-                setTimeout(() => {
-                    this.setState({
-                        ...this.state,
-                        episodes
-                    });
-                }, 0);
+                const { feedEpisodes } = this.props;
+                const newFeedEpisodes = feedEpisodes.set(feed, episodes);
+                this.props.setFeedEpisodes(newFeedEpisodes);
             })
             .catch(handleError);
     }
 
     UNSAFE_componentWillReceiveProps(newProps) {
-        if(newProps.feedId && (this.state.episodes.length === 0 || newProps.feedId !== this.props.feedId || newProps.quantity !== this.props.quantity)) {
-            this.loadEpisodes(newProps.quantity, newProps.feedId);
+        const { feedEpisodes } = this.props;
+        if(newProps.feedId) {
+            if(!feedEpisodes.has(newProps.feedId) || newProps.feedId !== this.props.feedId) {
+                this.loadEpisodes(newProps.quantity, newProps.feedId);
+            }
         }
     }
 
     onPlay(e, guid) {
         e.preventDefault();
-        this.setState({
-            ...this.state,
-            expanded: guid
-        });
+        this.props.setExpanded(guid);
     }
 
     onEnded() {
-        const { expanded } = this.state;
-        const episodes = this.props.feedId ? this.state.episodes : this.props.episodes;
-        const idx = episodes.findIndex(e => e.guid === expanded);
+        const { feedId, episodes, feedEpisodes, expanded } = this.props;
+        const selectedEpisodes = !feedId ? episodes : feedEpisodes.get(feedId);
+        const idx = selectedEpisodes.findIndex(e => e.guid === expanded);
         if(idx > 0) {
-            this.setState({
-                ...this.state,
-                expanded: episodes[idx - 1].guid
-            });
+            this.props.setExpanded(selectedEpisodes[idx - 1].guid);
         } else {
-            this.setState({
-                ...this.state,
-                expanded: ''
-            });
+            this.props.setExpanded('');
         }
     }
 
     render() {
 
-        const { expanded } = this.state;
-        const { feedId, feeds, episodes } = this.props;
+        const { feedId, feeds, episodes, expanded, feedEpisodes } = this.props;
+
         const feedsMap = feeds.reduce((map, f) => {
             return map.set(f.feedUrl, f);
         }, Map());
 
-        const episodesToUse = !feedId ? episodes : this.state.episodes.length === 0 ? this.state.episodes : this.state.episodes[0].feedUrl === feedId ? this.state.episodes : [];
+        let episodesToUse;
+        if(!feedId) {
+            episodesToUse = episodes;
+        } else if(feedEpisodes.has(feedId)) {
+           episodesToUse = feedEpisodes.get(feedId);
+        } else {
+            episodesToUse = [];
+        }
 
         return (
             <div>
@@ -165,11 +161,33 @@ class Episodes extends React.Component {
 
 }
 Episodes.propTypes = {
+    expanded: PropTypes.string,
+    feedEpisodes: PropTypes.instanceOf(Map),
     feedId: PropTypes.string,
     feeds: PropTypes.arrayOf(PropTypes.object),
     episodes: PropTypes.arrayOf(PropTypes.object),
     quantity: PropTypes.number,
-    loadMore: PropTypes.func
+    loadMore: PropTypes.func,
+    setFeedEpisodes: PropTypes.func,
+    setExpanded: PropTypes.func
 };
+const EpisodesContainer = connect(
+    ({ appState }) => ({
+        expanded: appState.expanded,
+        feedEpisodes: appState.feedEpisodes,
+        feeds: appState.feeds,
+        episodes: appState.episodes,
+        quantity: appState.quantity
+    }),
+    dispatch => ({
+        setFeedEpisodes: feedEpisodes => {
+            // debugger;
+            dispatch(actions.setFeedEpisodes({ feedEpisodes }));
+        },
+        setExpanded: expanded => {
+            dispatch(actions.setExpanded({ expanded }));
+        }
+    })
+)(Episodes);
 
-export default Episodes;
+export default EpisodesContainer;

@@ -1,21 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import request from 'superagent';
 import bindAll from 'lodash/bindAll';
 import Sidebar from './sidebar';
 import Episodes from './episodes';
 import About from './about';
 import Contact from './contact';
+import * as actions from '../actions';
 
 class App extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            quantity: 20,
-            feeds: [],
-            episodes: []
-        };
         bindAll(this, [
             'loadFeeds',
             'loadEpisodes',
@@ -25,18 +23,16 @@ class App extends React.Component {
 
     UNSAFE_componentWillMount() {
         this.loadFeeds();
-        const { quantity } = this.state;
+        const { quantity } = this.props;
         this.loadEpisodes(quantity);
+        this.props.setExpanded('');
     }
 
     loadFeeds() {
         request.get('/api/feeds')
             .then(({ text }) => {
                 const feeds = JSON.parse(text);
-                this.setState({
-                    ...this.state,
-                    feeds
-                });
+                this.props.setFeeds(feeds);
             })
             .catch(handleError);
     }
@@ -45,35 +41,26 @@ class App extends React.Component {
         request.get(`/api/episodes?q=${quantity}`)
             .then(({ text }) => {
                 const episodes = JSON.parse(text);
-                this.setState({
-                    ...this.state,
-                    episodes
-                });
+                this.props.setEpisodes(episodes);
             })
             .catch(handleError);
     }
 
     loadMore(e) {
         e.preventDefault();
-        const newQuantity = this.state.quantity + 20;
-        this.setState({
-            ...this.state,
-            quantity: newQuantity
-        });
+        const newQuantity = this.props.quantity + 20;
+        this.props.setQuantity(newQuantity);
         this.loadEpisodes(newQuantity);
     }
 
     render() {
 
-        console.log('state', this.state);
-
-        const { feeds, episodes, quantity } = this.state;
-        const { match } = this.props;
+        const { feeds, match } = this.props;
 
         const path = match.path.toLowerCase();
 
         return (
-            <div style={{flexGrow: 1, overflowY: 'auto'}}>
+            <div style={{flexGrow: 1, overflowY: 'scroll'}}>
                 <div className={'container-fluid'}>
                     <div className={'row'}>
                         <div className={'col'}>
@@ -92,7 +79,7 @@ class App extends React.Component {
                                     path === '/contact' ?
                                         <Contact />
                                         :
-                                        <Episodes feeds={feeds} episodes={episodes} feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} quantity={quantity} loadMore={this.loadMore} />
+                                        <Episodes feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} loadMore={this.loadMore} />
                                 }
                             </div>
                         </div>
@@ -106,7 +93,35 @@ class App extends React.Component {
 
 }
 App.propTypes = {
-    match: PropTypes.object
+    quantity: PropTypes.number,
+    feeds: PropTypes.arrayOf(PropTypes.object),
+    episodes: PropTypes.arrayOf(PropTypes.object),
+    match: PropTypes.object,
+    setFeeds: PropTypes.func,
+    setEpisodes: PropTypes.func,
+    setQuantity: PropTypes.func,
+    setExpanded: PropTypes.func
 };
+const AppContainer = withRouter(connect(
+    ({ appState }) => ({
+        quantity: appState.quantity,
+        feeds: appState.feeds,
+        episodes: appState.episodes
+    }),
+    dispatch => ({
+        setFeeds: feeds => {
+            dispatch(actions.setFeeds({ feeds }));
+        },
+        setEpisodes: episodes => {
+            dispatch(actions.setEpisodes({ episodes }));
+        },
+        setQuantity: quantity => {
+            dispatch(actions.setQuantity({ quantity }));
+        },
+        setExpanded: expanded => {
+            dispatch(actions.setExpanded({ expanded }));
+        }
+    })
+)(App));
 
-export default App;
+export default AppContainer;
