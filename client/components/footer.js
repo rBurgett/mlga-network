@@ -21,13 +21,25 @@ const Footer = ({ windowWidth }) => {
             paddingLeft: 15,
             paddingRight: 15
         },
+        linkContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'nowrap',
+            justifyContent: 'flex-start',
+            width: '100%'
+        },
         navLink: {
+            flexGrow: 0,
+            display: 'block',
             lineHeight: '50px',
             fontWeight: 'bold',
             marginRight: 30
         },
+        linkText: {
+            display: ['xs', 'sm'].includes(windowSize) ? 'none' : 'inline'
+        },
         designNote: {
-            display: ['xs', 'sm'].includes(windowSize) ? 'none' : 'block',
+            display: ['xs', 'sm', 'md'].includes(windowSize) ? 'none' : 'block',
             flexGrow: 1,
             textAlign: 'right',
             lineHeight: '50px',
@@ -35,12 +47,23 @@ const Footer = ({ windowWidth }) => {
         }
     };
 
+    if(['xs', 'sm'].includes(windowSize)) {
+        styles.navLink.flexGrow = 1;
+        styles.navLink.flexBasis = 1;
+        styles.navLink.marginRight = 0;
+        styles.navLink.textAlign = 'center';
+        styles.footerContainer.paddingLeft = 0;
+        styles.footerContainer.paddingRight = 0;
+    }
+
     return (
         <div style={styles.footerContainer}>
-            <div>
-                <Link style={styles.navLink} className={'footer-link'} to="/"><i className="fas fa-home"></i> Home</Link>
-                <Link style={styles.navLink}  className={'footer-link'} to="/about"><i className="fas fa-info-circle"></i> About</Link>
-                <Link style={styles.navLink} className={'footer-link'} to="/contact"><i className="fas fa-envelope"></i> Contact</Link>
+            <div style={styles.linkContainer}>
+                <Link style={styles.navLink} className={'footer-link'} to="/"><i className="fas fa-home"></i><span style={styles.linkText}> Home</span></Link>
+                <Link style={styles.navLink}  className={'footer-link'} to="/about"><i className="fas fa-info-circle"></i><span style={styles.linkText}> About</span></Link>
+                <Link style={styles.navLink} className={'footer-link'} to="/contact"><i className="fas fa-envelope"></i><span style={styles.linkText}> Contact</span></Link>
+                <a style={styles.navLink} className={'footer-link'} href={'https://itunes.apple.com/us/podcast/mlga-p%C3%B8dcast-network/id1449333590?mt=2'} target={'_blank'}><i className="fab fa-itunes-note"></i><span style={styles.linkText}> iTunes</span></a>
+                <a style={styles.navLink} className={'footer-link'} href={'/audio/rss'} target={'_blank'}><i className="fas fa-rss"></i><span style={styles.linkText}> RSS</span></a>
             </div>
             <div style={styles.designNote}>Site designed and built by <a href="https://ryanburgett.com">Ryan Burgett</a>.</div>
         </div>
