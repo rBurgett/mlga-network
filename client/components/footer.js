@@ -26,7 +26,7 @@ const Footer = ({ windowWidth }) => {
             flexDirection: 'row',
             flexWrap: 'nowrap',
             justifyContent: 'flex-start',
-            width: '100%'
+            flexGrow: 1
         },
         navLink: {
             flexGrow: 0,
