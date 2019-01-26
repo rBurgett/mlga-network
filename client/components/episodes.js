@@ -16,48 +16,76 @@ let Episode = ({ feed, episode, expanded, windowWidth, play, ended }) => {
     const formattedDate = moment(episode.isoDate).format('MMMM D, YYYY');
 
     const styles = {
-        flexContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'nowrap',
-            justifyContent: 'flex-start',
+        container: {
             marginBottom: 20,
             borderColor: '#ddd',
             borderWidth: 1,
             borderStyle: 'solid',
             padding: 10
         },
+        flexContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'nowrap',
+            justifyContent: 'flex-start'
+        },
         col1: {
-            minWidth: 100,
-            width: 100,
-            height: 100,
+            minWidth: windowSize === 'xs' ? 50 : 100,
+            width: windowSize === 'xs' ? 50 : 100,
+            height: windowSize === 'xs' ? 50 : 100,
             marginRight: 15
         },
         col2: {
             flexGrow: 1,
             overflow: 'hidden'
         },
-        contentContainer: {}
+        contentContainer: {
+            overflowWrap: 'break-word'
+        }
     };
 
     styles.contentContainer = ['sm', 'xs'].includes(windowSize) ? {fontSize: 14} : styles.contentContainer;
 
     return (
-        <div style={styles.flexContainer}>
-            <img alt={feed.title} src={secureUrl(feed.image.url)} style={styles.col1}></img>
-            <div style={styles.col2}>
-                {['sm', 'xs'].includes(windowSize) ?
-                    <h4 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h4>
-                    :
-                    <h3 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h3>
-                }
-                <div style={styles.contentContainer}>{formattedDate} - {episode.contentSnippet}</div>
-                {expanded ?
-                    <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={ended} controls={true} height={60} playing={true} disabledPlayers={['SoundCloud']} />
-                    :
-                    <div></div>
-                }
+        <div style={styles.container}>
+            <div style={styles.flexContainer}>
+                <img alt={feed.title} src={secureUrl(feed.image.url)} style={styles.col1}></img>
+                <div style={styles.col2}>
+                    {['sm', 'xs'].includes(windowSize) ?
+                        <h4 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h4>
+                        :
+                        <h3 style={{marginTop: 0}}>{episode.title} <a href="#" className={'text-success'} onClick={e => play(e, episode.guid)}><i className="fas fa-play-circle"></i></a></h3>
+                    }
+                    {windowSize !== 'xs' ?
+                        <div style={{overflow: 'hidden'}}>
+                            <div style={styles.contentContainer}>{formattedDate} - {episode.contentSnippet}</div>
+                            {expanded ?
+                                <div style={{position: 'relative'}}>
+                                    <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={ended} controls={true} width={'100%'} height={60} playing={true} disabledPlayers={['SoundCloud']} />
+                                </div>
+                                :
+                                <div></div>
+                            }
+                        </div>
+                        :
+                        <div></div>
+                    }
+                </div>
             </div>
+            {windowSize === 'xs' ?
+                <div style={{overflow: 'hidden'}}>
+                    <div style={styles.contentContainer}>{formattedDate} - {episode.contentSnippet}</div>
+                    {expanded ?
+                        <div style={{position: 'relative'}}>
+                            <ReactPlayer url={secureUrl(episode.enclosure.url)} onEnded={ended} controls={true} width={'100%'} height={60} playing={true} disabledPlayers={['SoundCloud']} />
+                        </div>
+                        :
+                        <div></div>
+                    }
+                </div>
+                :
+                <div></div>
+            }
         </div>
     );
 };
