@@ -9,6 +9,8 @@ import Episodes from './episodes';
 import About from './about';
 import Contact from './contact';
 import * as actions from '../actions';
+import { getWindowSize } from '../util';
+import ShowMenu from './show-menu';
 
 class App extends React.Component {
 
@@ -55,12 +57,23 @@ class App extends React.Component {
 
     render() {
 
-        const { feeds, match } = this.props;
+        const { feeds, match, windowWidth, windowHeight, expandShows } = this.props;
+
+        const windowSize = getWindowSize(windowWidth);
 
         const path = match.path.toLowerCase();
 
+        const hideShows = ['xs', 'sm', 'md'].includes(windowSize);
+
+        const styles = {
+            container: {
+                flexGrow: 1,
+                overflowY: expandShows ? 'hidden' : 'scroll'
+            }
+        };
+
         return (
-            <div style={{flexGrow: 1, overflowY: 'scroll'}}>
+            <div id="js-mainContainer" style={styles.container}>
                 <div className={'container-fluid'}>
                     <div className={'row'}>
                         <div className={'col'}>
@@ -69,9 +82,13 @@ class App extends React.Component {
                     </div>
                     {feeds.length > 0 ?
                         <div className={'row'}>
-                            <div className={'col-lg-4 col-md-12'}>
-                                <Sidebar feeds={feeds} />
-                            </div>
+                            {hideShows ?
+                                <div></div>
+                                :
+                                <div className={'col-lg-4 col-md-12'}>
+                                    <Sidebar feeds={feeds} />
+                                </div>
+                            }
                             <div className={'col-lg-8 col-md-12'}>
                                 {path === '/about' ?
                                     <About />
@@ -87,6 +104,14 @@ class App extends React.Component {
                         <div></div>
                     }
                 </div>
+
+                {expandShows ?
+                    <ShowMenu windowHeight={windowHeight}>
+                        <Sidebar feeds={feeds} title={'Shows'} />
+                    </ShowMenu>
+                    :
+                    <div></div>
+                }
             </div>
         );
     }
@@ -94,9 +119,12 @@ class App extends React.Component {
 }
 App.propTypes = {
     quantity: PropTypes.number,
+    windowWidth: PropTypes.number,
+    windowHeight: PropTypes.number,
     feeds: PropTypes.arrayOf(PropTypes.object),
     episodes: PropTypes.arrayOf(PropTypes.object),
     match: PropTypes.object,
+    expandShows: PropTypes.bool,
     setFeeds: PropTypes.func,
     setEpisodes: PropTypes.func,
     setQuantity: PropTypes.func,
@@ -106,7 +134,10 @@ const AppContainer = withRouter(connect(
     ({ appState }) => ({
         quantity: appState.quantity,
         feeds: appState.feeds,
-        episodes: appState.episodes
+        episodes: appState.episodes,
+        windowWidth: appState.windowWidth,
+        windowHeight: appState.windowHeight,
+        expandShows: appState.expandShows
     }),
     dispatch => ({
         setFeeds: feeds => {

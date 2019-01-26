@@ -35,4 +35,10 @@ export const setExpanded = ({ expanded }) => ({
         expanded
     }
 });
+export const setExpandShows = ({ expandShows }) => ({
+    type: 'SET_EXPAND_SHOWS',
+    payload: {
+        expandShows
+    }
+});
 

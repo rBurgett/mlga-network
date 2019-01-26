@@ -26,8 +26,15 @@ body {
     color: rgb(33, 37, 41);
     opacity: .7;
 }
+.footer-link:focus {
+    outline: none;
+}
 .footer-link:hover {
     color: rgb(33, 37, 41);
     opacity: 1;
     text-decoration: none;
+}
+.height-transition {
+    transition: height 250ms;
+    -webkit-transition: max-height 250ms;
 }

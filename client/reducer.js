@@ -6,6 +6,7 @@ const getInitialState = () => ({
     episodes: [],
     feedEpisodes: Map(),
     expanded: '',
+    expandShows: false,
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth
 });
@@ -42,6 +43,11 @@ export default (state = getInitialState(), { type, payload }) => {
             return {
                 ...state,
                 expanded: payload.expanded
+            };
+        case 'SET_EXPAND_SHOWS':
+            return {
+                ...state,
+                expandShows: payload.expandShows
             };
         default:
             return state;
