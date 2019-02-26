@@ -48,7 +48,7 @@ const updateFeeds = async function() {
             const slug = await new Promise((resolve, reject) => {
                 db.feeds.findOne({ feedUrl: feed.feedUrl }, (err, res) => {
                     if(err) reject(err);
-                    else resolve(res && res.slug ? res.slug : makeSlug(res.title));
+                    else resolve(!res ? '' : res.slug ? res.slug : makeSlug(res.title));
                 });
             });
 
