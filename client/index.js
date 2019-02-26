@@ -52,7 +52,7 @@ const AppRouter = () => {
                     <Route path={'/'} exact={true} component={App} />
                     <Route path={'/about'} component={App} />
                     <Route path={'/contact'} component={App} />
-                    <Route path={'/channel/:id'} component={App} />
+                    <Route path={'/channel/:slug'} component={App} />
                     <Footer />
                 </div>
             </Router>

@@ -102,7 +102,7 @@ class App extends React.Component {
                                     path === '/contact' ?
                                         <Contact />
                                         :
-                                        <Episodes feedId={match.params.id ? decodeURIComponent(match.params.id) : ''} loadMore={this.loadMore} />
+                                        <Episodes slug={match.params.slug} loadMore={this.loadMore} />
                                 }
                             </div>
                         </div>

@@ -28,6 +28,11 @@ const db = {
 const parser = new Parser();
 const feeds = fs.readJsonSync('feeds.json', 'utf8');
 
+const makeSlug = str => str
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '')
+    .toLowerCase();
+
 const updateFeeds = async function() {
     try {
         for(const feedUrl of feeds) {
@@ -39,6 +44,15 @@ const updateFeeds = async function() {
             if(/godarchy\.org/.test(feed.feedUrl)) {
                 feed.image.url = 'https://www.godarchy.org/wp-content/uploads/2016/10/godarchy-yellow.jpg';
             }
+
+            const slug = await new Promise((resolve, reject) => {
+                db.feeds.findOne({ feedUrl: feed.feedUrl }, (err, res) => {
+                    if(err) reject(err);
+                    else resolve(res && res.slug ? res.slug : makeSlug(res.title));
+                });
+            });
+
+            meta.slug = slug;
 
             await new Promise((resolve, reject) => {
                 db.feeds.update({ feedUrl: feed.feedUrl }, meta, { upsert: true }, err => {
@@ -52,9 +66,16 @@ const updateFeeds = async function() {
                         if(err) {
                             reject(err);
                         } else if(doc) {
-                            resolve();
+                            if(doc.slug) {
+                                resolve();
+                            } else {
+                                db.episodes.update({ guid: i.guid }, Object.assign({}, doc, {slug}), err => {
+                                    if(err) reject(err);
+                                    else resolve();
+                                });
+                            }
                         } else {
-                            db.episodes.insert(Object.assign({}, i, {feedUrl: feed.feedUrl}), err1 => {
+                            db.episodes.insert(Object.assign({}, i, {slug, feedUrl: feed.feedUrl}), err1 => {
                                 if(err1) {
                                     reject(err1);
                                 } else {
@@ -103,7 +124,7 @@ const app = express()
     .get('/api/episodes', (req, res) => {
         const { q = 20, f = '' } = req.query;
         const query = {};
-        if(f) query.feedUrl = decodeURIComponent(f);
+        if(f) query.slug = f;
         db.episodes.find(query, (err, docs) => {
             if(err) {
                 console.error(err);
@@ -206,23 +227,33 @@ const app = express()
             .replace(/{{uri}}/g, '');
         res.send(indexHTML);
     })
-    .get('/channel/:feedUrl', (req, res) => {
-        const { feedUrl } = req.params;
-        db.feeds.findOne({ feedUrl }, (err, feed) => {
+    .get('/channel/:slug', (req, res) => {
+        const { slug } = req.params;
+        db.feeds.findOne({ slug }, (err, feed) => {
             if(err) {
                 console.error(err);
                 res.sendStatus(500);
-            } else if(!feed) {
-                res.sendStatus(404);
-            } else {
+            } else if(feed) {
                 const indexHTML = baseIndexHTML
                     .replace(/{{title}}/g, escape(feed.title + ' on MLGA Pødcast Network'))
                     .replace(/{{description}}/g, escape(`Listen to ${feed.title} on the MLGA Pødcast Network.`))
                     .replace(/{{image}}/g, secureUrl(feed.image.url))
                     .replace(/{{imageWidth}}/g, '')
                     .replace(/{{imageHeight}}/g, '')
-                    .replace(/{{uri}}/g, `/channel/${encodeURIComponent(feedUrl)}`);
+                    .replace(/{{uri}}/g, `/channel/${feed.slug}`);
                 res.send(indexHTML);
+            } else {
+                const feedUrl = slug;
+                db.feeds.findOne({ feedUrl }, (err, feed1) => {
+                    if(err) {
+                        console.error(err);
+                        res.sendStatus(500);
+                    } else if(!feed1) {
+                        res.sendStatus(404);
+                    } else {
+                        res.redirect(301, `/channel/${feed1.slug}`);
+                    }
+                });
             }
         });
     })

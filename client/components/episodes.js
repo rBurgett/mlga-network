@@ -114,12 +114,12 @@ class Episodes extends React.Component {
         ]);
     }
 
-    loadEpisodes(quantity, feed) {
-        request.get(`/api/episodes?q=${quantity}&f=${encodeURIComponent(feed)}`)
+    loadEpisodes(quantity, slug) {
+        request.get(`/api/episodes?q=${quantity}&f=${slug}`)
             .then(({ text }) => {
                 const episodes = JSON.parse(text);
                 const { feedEpisodes } = this.props;
-                const newFeedEpisodes = feedEpisodes.set(feed, episodes);
+                const newFeedEpisodes = feedEpisodes.set(slug, episodes);
                 this.props.setFeedEpisodes(newFeedEpisodes);
             })
             .catch(handleError);
@@ -127,9 +127,9 @@ class Episodes extends React.Component {
 
     UNSAFE_componentWillReceiveProps(newProps) {
         const { feedEpisodes } = this.props;
-        if(newProps.feedId) {
-            if(!feedEpisodes.has(newProps.feedId) || newProps.feedId !== this.props.feedId) {
-                this.loadEpisodes(newProps.quantity, newProps.feedId);
+        if(newProps.slug) {
+            if(!feedEpisodes.has(newProps.slug) || newProps.slug !== this.props.slug) {
+                this.loadEpisodes(newProps.quantity, newProps.slug);
             }
         }
     }
@@ -140,8 +140,8 @@ class Episodes extends React.Component {
     }
 
     onEnded() {
-        const { feedId, episodes, feedEpisodes, expanded } = this.props;
-        const selectedEpisodes = !feedId ? episodes : feedEpisodes.get(feedId);
+        const { slug, episodes, feedEpisodes, expanded } = this.props;
+        const selectedEpisodes = !slug ? episodes : feedEpisodes.get(slug);
         const idx = selectedEpisodes.findIndex(e => e.guid === expanded);
         if(idx > 0) {
             this.props.setExpanded(selectedEpisodes[idx - 1].guid);
@@ -152,17 +152,17 @@ class Episodes extends React.Component {
 
     render() {
 
-        const { feedId, feeds, episodes, expanded, feedEpisodes } = this.props;
+        const { slug, feeds, episodes, expanded, feedEpisodes } = this.props;
 
         const feedsMap = feeds.reduce((map, f) => {
-            return map.set(f.feedUrl, f);
+            return map.set(f.slug, f);
         }, Map());
 
         let episodesToUse;
-        if(!feedId) {
+        if(!slug) {
             episodesToUse = episodes;
-        } else if(feedEpisodes.has(feedId)) {
-           episodesToUse = feedEpisodes.get(feedId);
+        } else if(feedEpisodes.has(slug)) {
+           episodesToUse = feedEpisodes.get(slug);
         } else {
             episodesToUse = [];
         }
@@ -170,18 +170,18 @@ class Episodes extends React.Component {
         return (
             <div>
                 <div>
-                    {feedId ?
+                    {slug ?
                         <div>
-                            <h2 style={{marginTop: 0}}>{feedsMap.get(feedId).title}</h2>
-                            <p><a href={feedsMap.get(feedId).link} target={'_blank'}>{feedsMap.get(feedId).link}</a></p>
-                            <p>{feedsMap.get(feedId).description}</p>
+                            <h2 style={{marginTop: 0}}>{feedsMap.get(slug).title}</h2>
+                            <p><a href={feedsMap.get(slug).link} target={'_blank'}>{feedsMap.get(slug).link}</a></p>
+                            <p>{feedsMap.get(slug).description}</p>
                         </div>
                         :
                         <div></div>
                     }
                     {episodesToUse.map(e => {
                         return (
-                            <Episode key={e.guid} episode={e} feed={feedsMap.get(e.feedUrl)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
+                            <Episode key={e.guid} episode={e} feed={feedsMap.get(e.slug)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
                         );
                     })}
                 </div>
@@ -196,7 +196,7 @@ class Episodes extends React.Component {
 Episodes.propTypes = {
     expanded: PropTypes.string,
     feedEpisodes: PropTypes.instanceOf(Map),
-    feedId: PropTypes.string,
+    slug: PropTypes.string,
     feeds: PropTypes.arrayOf(PropTypes.object),
     episodes: PropTypes.arrayOf(PropTypes.object),
     quantity: PropTypes.number,

@@ -6,7 +6,7 @@ import { secureUrl } from '../util';
 import * as actions from '../actions';
 
 const SidebarItem = ({ feed }) => {
-    const to = `/channel/${encodeURIComponent(feed.feedUrl)}`;
+    const to = `/channel/${feed.slug}`;
     return (
         <Link to={to} className={'list-group-item list-group-item-action'}>
              <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start'}}>
@@ -84,7 +84,7 @@ const Sidebar = ({ title, feeds, setExpandShows }) => {
             }
             {feeds.map(feed => {
                 return (
-                    <SidebarItem key={feed.feedUrl} feed={feed} />
+                    <SidebarItem key={feed.slug} feed={feed} />
                 );
             })}
         </div>
