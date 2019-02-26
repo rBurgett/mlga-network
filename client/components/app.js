@@ -33,7 +33,13 @@ class App extends React.Component {
     loadFeeds() {
         request.get('/api/feeds')
             .then(({ text }) => {
-                const feeds = JSON.parse(text);
+                let feeds = JSON.parse(text);
+                const idx = feeds.findIndex(e => e.title === 'Make Liberty Great Again');
+                if(idx > -1) feeds = [
+                    feeds[idx],
+                    ...feeds.slice(0, idx),
+                    ...feeds.slice(idx + 1)
+                ];
                 this.props.setFeeds(feeds);
             })
             .catch(handleError);
