@@ -181,7 +181,7 @@ class Episodes extends React.Component {
                     }
                     {episodesToUse.map(e => {
                         return (
-                            <Episode key={e.guid} episode={e} feed={feedsMap.get(e.slug)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
+                            <Episode key={e.guid} episode={e} feed={feedsMap.get(e.slug) || feeds.find(f => f.feedUrl === e.feedUrl)} play={this.onPlay} expanded={expanded === e.guid} ended={this.onEnded} />
                         );
                     })}
                 </div>
