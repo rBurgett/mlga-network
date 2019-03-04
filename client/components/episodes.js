@@ -115,21 +115,36 @@ class Episodes extends React.Component {
     }
 
     loadEpisodes(quantity, slug) {
+        const { setLoading } = this.props;
+        setLoading(slug);
         request.get(`/api/episodes?q=${quantity}&f=${slug}`)
             .then(({ text }) => {
                 const episodes = JSON.parse(text);
                 const { feedEpisodes } = this.props;
                 const newFeedEpisodes = feedEpisodes.set(slug, episodes);
                 this.props.setFeedEpisodes(newFeedEpisodes);
+                setLoading('');
             })
             .catch(handleError);
     }
 
+    UNSAFE_componentWillMount() {
+        const { feedEpisodes, slug, quantity } = this.props;
+        if(slug) {
+            if(!feedEpisodes.has(slug)) {
+                this.loadEpisodes(quantity, slug);
+            }
+        }
+    }
+
     UNSAFE_componentWillReceiveProps(newProps) {
+        const { loading } = newProps;
         const { feedEpisodes } = this.props;
         if(newProps.slug) {
             if(!feedEpisodes.has(newProps.slug) || newProps.slug !== this.props.slug) {
-                this.loadEpisodes(newProps.quantity, newProps.slug);
+                if(loading !== newProps.slug) {
+                    this.loadEpisodes(newProps.quantity, newProps.slug);
+                }
             }
         }
     }
@@ -196,29 +211,34 @@ class Episodes extends React.Component {
 Episodes.propTypes = {
     expanded: PropTypes.string,
     feedEpisodes: PropTypes.instanceOf(Map),
+    loading: PropTypes.string,
     slug: PropTypes.string,
     feeds: PropTypes.arrayOf(PropTypes.object),
     episodes: PropTypes.arrayOf(PropTypes.object),
     quantity: PropTypes.number,
     loadMore: PropTypes.func,
     setFeedEpisodes: PropTypes.func,
-    setExpanded: PropTypes.func
+    setExpanded: PropTypes.func,
+    setLoading: PropTypes.func
 };
 const EpisodesContainer = connect(
     ({ appState }) => ({
         expanded: appState.expanded,
         feedEpisodes: appState.feedEpisodes,
+        loading: appState.loading,
         feeds: appState.feeds,
         episodes: appState.episodes,
         quantity: appState.quantity
     }),
     dispatch => ({
         setFeedEpisodes: feedEpisodes => {
-            // debugger;
             dispatch(actions.setFeedEpisodes({ feedEpisodes }));
         },
         setExpanded: expanded => {
             dispatch(actions.setExpanded({ expanded }));
+        },
+        setLoading: loading => {
+            dispatch(actions.setLoading({ loading }));
         }
     })
 )(Episodes);
