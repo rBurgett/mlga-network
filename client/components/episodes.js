@@ -188,7 +188,12 @@ class Episodes extends React.Component {
                     {slug ?
                         <div>
                             <h2 style={{marginTop: 0}}>{feedsMap.get(slug).title}</h2>
-                            <p><a href={feedsMap.get(slug).link} target={'_blank'}>{feedsMap.get(slug).link}</a></p>
+                            <div className={'btn-group'} style={{marginTop: 10, marginBottom: 15}}>
+                                <a className={'btn btn-outline-secondary'} href={feedsMap.get(slug).link} target={'_blank'}><i className={'fas fa-globe'} /> Web</a>
+                                {/*<a className={'btn btn-outline-secondary'} href={feedsMap.get(slug).feedUrl} target={'_blank'}><i className={'fab fa-patreon'} /> Patreon</a>*/}
+                                {/*<a className={'btn btn-outline-secondary'} href={feedsMap.get(slug).feedUrl} target={'_blank'}><i className={'fab fa-itunes-note'} /> iTunes</a>*/}
+                                <a className={'btn btn-outline-secondary'} href={feedsMap.get(slug).feedUrl} target={'_blank'}><i className={'fas fa-rss'} /> RSS</a>
+                            </div>
                             <p>{feedsMap.get(slug).description}</p>
                         </div>
                         :
