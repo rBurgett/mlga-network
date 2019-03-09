@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "build": "webpack --mode=production --progress",
-    "watch": "webpack --mode=development --watch --progress"
+    "watch": "webpack --mode=development --watch --progress",
+    "generate-session-secret": "node generate-session-secret"
   },
   "repository": {
     "type": "git",
@@ -30,14 +31,20 @@
   },
   "dependencies": {
     "body-parser": "^1.18.3",
+    "connect-ensure-login": "^0.1.1",
     "connect-multiparty": "^2.2.0",
+    "cookie-parser": "^1.4.4",
     "express": "^4.16.4",
+    "express-nedb-session": "^0.1.1",
+    "express-session": "^1.15.6",
     "fs-extra-promise": "^1.0.1",
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.3.1",
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "nedb": "^1.8.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
     "podcast": "^1.1.0",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
@@ -48,6 +55,7 @@
     "redux": "^4.0.1",
     "rss-parser": "^3.6.2",
     "serve-favicon": "^2.5.0",
-    "superagent": "^4.1.0"
+    "superagent": "^4.1.0",
+    "uuid": "^3.3.2"
   }
 }

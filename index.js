@@ -1,120 +1,150 @@
 const bodyParser = require('body-parser');
 const DataStore = require('nedb');
 const express = require('express');
+const session = require('express-session');
+const NedbStore = require('express-nedb-session')(session);
+const passport = require('passport');
+const { Strategy } = require('passport-local');
+const { ensureLoggedIn } = require('connect-ensure-login');
 const favicon = require('serve-favicon');
 const fs = require('fs-extra-promise');
 const multipart = require('connect-multiparty');
 const escape = require('lodash/escape');
 const omit = require('lodash/omit');
-const Parser = require('rss-parser');
 const path = require('path');
-// const request = require('superagent');
 const Feed = require('podcast');
+const { pbkdf2, generateSalt, secureUrl } = require('./modules/util');
+const ErrorHandler = require('./modules/handle-error');
+const FeedUpdater = require('./modules/feed-updater');
 
-fs.ensureDirSync('data');
+const { handleError } = new ErrorHandler();
+
 fs.ensureDirSync('public2');
 
-// const { pageId, accessToken } = fs.readJsonSync('.env.json');
-
-const secureUrl = (url = '') => {
-    return url.replace(/^http:/, 'https:');
+/************************************************
+ * Constants
+ ************************************************/
+const saltLength = 16;
+const userTypes = {
+    admin: 'admin',
+    user: 'user'
 };
+const dataPath = path.join(__dirname, 'data');
 
+/************************************************
+ * Database Initialization
+ ************************************************/
+fs.ensureDirSync('data');
 const db = {
-    feeds: new DataStore({ filename: path.join(__dirname, 'data', 'feeds.db'), autoload: true }),
-    episodes: new DataStore({ filename: path.join(__dirname, 'data', 'episodes.db'), autoload: true })
+    feeds: new DataStore({ filename: path.join(dataPath, 'feeds.db'), autoload: true }),
+    episodes: new DataStore({ filename: path.join(dataPath, 'episodes.db'), autoload: true }),
+    users: new DataStore({ filename: path.join(dataPath, 'users.db'), autoload: true })
 };
 
-const parser = new Parser();
+/************************************************
+ * Load and Update Feeds
+ ************************************************/
 const feeds = fs.readJsonSync('feeds.json', 'utf8');
 
-const makeSlug = str => str
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]/g, '')
-    .toLowerCase();
+const feedUpdater = new FeedUpdater({ feeds, db });
 
-const updateFeeds = async function() {
-    try {
-        for(const feedUrl of feeds) {
-            const feed = await parser.parseURL(feedUrl);
-            const items = [...feed.items]
-                .filter(i => i.enclosure ? true : false);
-            const meta = omit(feed, ['items']);
+feedUpdater.update().catch(handleError);
+setInterval(() => {
+    feedUpdater.update().catch(handleError);
+}, 1800000);
 
-            if(/godarchy\.org/.test(feed.feedUrl)) {
-                feed.image.url = 'https://www.godarchy.org/wp-content/uploads/2016/10/godarchy-yellow.jpg';
-            }
-
-            const slug = await new Promise((resolve, reject) => {
-                db.feeds.findOne({ feedUrl: feed.feedUrl }, (err, res) => {
-                    if(err) reject(err);
-                    else resolve(res && res.slug ? res.slug : makeSlug(feed.title));
-                });
-            });
-
-            meta.slug = slug;
-
-            await new Promise((resolve, reject) => {
-                db.feeds.update({ feedUrl: feed.feedUrl }, meta, { upsert: true }, err => {
-                    if(err) reject(err);
-                    else resolve();
-                });
-            });
-            const promises = items.map(i => {
-                return new Promise((resolve, reject) => {
-                    db.episodes.findOne({ guid: i.guid }, (err, doc) => {
-                        if(err) {
-                            reject(err);
-                        } else if(doc) {
-                            if(doc.slug) {
-                                resolve();
-                            } else {
-                                db.episodes.update({ guid: i.guid }, Object.assign({}, doc, {slug}), err => {
-                                    if(err) reject(err);
-                                    else resolve();
-                                });
-                            }
-                        } else {
-                            db.episodes.insert(Object.assign({}, i, {slug, feedUrl: feed.feedUrl}), err1 => {
-                                if(err1) {
-                                    reject(err1);
-                                } else {
-                                    resolve();
-                                    // const message = `"${i.title}" from ${feed.title} is now available on the MLGA Pødcast Network.`;
-                                    // const link = `https://mlganetwork.com/channel/${encodeURIComponent(feed.feedUrl)}`;
-                                    // request.post(`https://graph.facebook.com/${pageId}/feed?message=${encodeURIComponent(message)}&link=${encodeURIComponent(link)}&access_token=${accessToken}`)
-                                    //     .then(() => resolve())
-                                    //     .catch(() => resolve());
-                                }
-                            });
-                        }
-                    });
-                });
-            });
-            await Promise.all(promises);
-        }
-        console.log('Done updating feeds.');
-    } catch(err) {
-        console.error(err);
+/************************************************
+ * User Accounts Setup
+ ************************************************/
+db.users.findOne({username: 'ryan@burgettweb.net'}, (err, doc) => {
+    if(err) {
+        handleError(err);
+    } else if(!doc) {
+        const password = 'adminpass';
+        const salt = generateSalt(saltLength);
+        const hashedPassword = pbkdf2(password, salt);
+        db.users.insert({
+            username: 'ryan@burgettweb.net',
+            password: hashedPassword,
+            salt,
+            type: userTypes.admin
+        });
     }
-};
+});
 
-updateFeeds();
-setInterval(updateFeeds, 1800000);
+const { SESSION_SECRET } = process.env;
+if(!SESSION_SECRET) throw new Error('You must have a SESSION_SECRET environmental variable set.');
 
+passport.use(new Strategy((username, password, callback) => {
+    db.users.findOne({ username }, (err, doc) => {
+        if(err) return callback(err);
+        if(!doc) return callback(null, false);
+        const { salt } = doc;
+        const hashedPassword = pbkdf2(password, salt);
+        if(hashedPassword !== doc.password) return callback(null, false);
+        callback(null, doc);
+    });
+}));
+passport.serializeUser((user, callback) => {
+    callback(null, user._id);
+});
+passport.deserializeUser((_id, callback) => {
+    db.users.findOne({ _id }, (err, user) => {
+        if(err) callback(err);
+        else callback(null, user);
+    });
+});
+
+/************************************************
+ * Load HTML Files
+ ************************************************/
 const baseIndexHTML = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+const adminHTML = fs.readFileSync('admin.html', 'utf8');
 
+/************************************************
+ * Create Server
+ ************************************************/
 const app = express()
     .use(bodyParser.json())
     .use(bodyParser.urlencoded({ extended: true }))
     .use(multipart({
         autoFiles: false
     }))
+    .use(session({
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store: new NedbStore({ filename: path.join(dataPath, 'session.db') })
+    }))
+    .use(passport.initialize())
+    .use(passport.session())
     .use(favicon('./public/favicon.ico'))
+    .get('/login', async function(req, res) {
+        const loginHTML = await fs.readFileAsync('login.html', 'utf8');
+        res.send(loginHTML);
+    })
+    .post('/login',
+        passport.authenticate('local', { failureRedirect: '/login' }),
+        (req, res) => {
+            if(req.user.type === 'admin') {
+                res.redirect('/admin');
+            } else {
+                res.redirect('/profile');
+            }
+        })
+    .get('/logout', (req, res) => {
+        req.logout();
+        res.redirect('/');
+    })
+    .get('/admin',
+        ensureLoggedIn('/login'),
+        async function(req, res) {
+            res.send(adminHTML);
+        })
     .get('/api/feeds', (req, res) => {
         db.feeds.find({}, (err, docs) => {
             if(err) {
-                console.error(err);
+                handleError(err);
                 res.sendStatus(500);
             } else {
                 res.send(JSON.stringify(docs));
@@ -127,7 +157,7 @@ const app = express()
         if(f) query.slug = f;
         db.episodes.find(query, (err, docs) => {
             if(err) {
-                console.error(err);
+                handleError(err);
                 res.sendStatus(500);
             } else {
                 const preppedDocs = docs
@@ -191,7 +221,7 @@ const app = express()
             res.set('Content-Type', 'application/rss+xml');
             res.send(feed.buildXml('  '));
         } catch(err) {
-            console.error(err);
+            handleError(err);
             res.sendStatus(500);
         }
     })
@@ -231,7 +261,7 @@ const app = express()
         const { slug } = req.params;
         db.feeds.findOne({ slug }, (err, feed) => {
             if(err) {
-                console.error(err);
+                handleError(err);
                 res.sendStatus(500);
             } else if(feed) {
                 const indexHTML = baseIndexHTML
@@ -244,9 +274,9 @@ const app = express()
                 res.send(indexHTML);
             } else {
                 const feedUrl = slug;
-                db.feeds.findOne({ feedUrl }, (err, feed1) => {
-                    if(err) {
-                        console.error(err);
+                db.feeds.findOne({ feedUrl }, (err1, feed1) => {
+                    if(err1) {
+                        handleError(err1);
                         res.sendStatus(500);
                     } else if(!feed1) {
                         res.sendStatus(404);

@@ -55,13 +55,6 @@
         "react"
     ],
     "globals": {
-        "$": false,
-        "saveAs": false,
-        "getImagePath": true,
-        "gql": true,
-        "handleError": true,
-        "Localize": true,
-        "listManager": true,
-        "routerHistory": true
+        "$": false
     }
 }
