@@ -17,12 +17,10 @@ const { pbkdf2, generateSalt, secureUrl } = require('./modules/util');
 const ErrorHandler = require('./modules/handle-error');
 const FeedUpdater = require('./modules/feed-updater');
 
-const { handleError } = new ErrorHandler();
-
 fs.ensureDirSync('public2');
 
 /************************************************
- * Constants
+ * Set Constants
  ************************************************/
 const saltLength = 16;
 const userTypes = {
@@ -30,6 +28,28 @@ const userTypes = {
     user: 'user'
 };
 const dataPath = path.join(__dirname, 'data');
+
+/************************************************
+ * Load Environmental Variables
+ ************************************************/
+const { SESSION_SECRET, MAILGUN_KEY, MAILGUN_DOMAIN } = process.env;
+if(!SESSION_SECRET) throw new Error('You must have a SESSION_SECRET environmental variable set.');
+if(!MAILGUN_KEY) throw new Error('You must have a MAILGUN_KEY environmental variable set.');
+if(!MAILGUN_DOMAIN) throw new Error('You must have a MAILGUN_DOMAIN environmental variable set.');
+
+/************************************************
+ * Configure Mailgun
+ ************************************************/
+const mailgun = require('mailgun-js')({
+    apiKey: MAILGUN_KEY,
+    domain: MAILGUN_DOMAIN
+});
+
+/************************************************
+ * Initialize Error Handler
+ ************************************************/
+const errorHandler = new ErrorHandler({ mailgun });
+const handleError = err => errorHandler.handle(err);
 
 /************************************************
  * Database Initialization
@@ -71,9 +91,6 @@ db.users.findOne({username: 'ryan@burgettweb.net'}, (err, doc) => {
         });
     }
 });
-
-const { SESSION_SECRET } = process.env;
-if(!SESSION_SECRET) throw new Error('You must have a SESSION_SECRET environmental variable set.');
 
 passport.use(new Strategy((username, password, callback) => {
     db.users.findOne({ username }, (err, doc) => {
