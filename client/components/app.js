@@ -34,12 +34,25 @@ class App extends React.Component {
         request.get('/api/feeds')
             .then(({ text }) => {
                 let feeds = JSON.parse(text);
-                const idx = feeds.findIndex(e => e.title === 'Make Liberty Great Again');
-                if(idx > -1) feeds = [
-                    feeds[idx],
-                    ...feeds.slice(0, idx),
-                    ...feeds.slice(idx + 1)
-                ];
+                const mlga = feeds.find(e => e.title === 'Make Liberty Great Again');
+                const ta = feeds.find(e => e.title === 'Techno-Agorist');
+                const morningDrive = feeds.find(e => e.title.includes('David'));
+                const fpf = feeds.find(e => e.title.includes('Foreign Policy'));
+                const godarchy = feeds.find(e => e.title.includes('GodArchy'));
+                const wall = feeds.find(e => e.title.includes('Wall'));
+                const brushfires = feeds.find(e => e.title.includes('Brushfires'));
+                if(mlga && ta && morningDrive && fpf && godarchy && wall && brushfires) {
+                    feeds = [
+                        mlga,
+                        ta,
+                        morningDrive,
+                        wall,
+                        fpf,
+                        godarchy,
+                        brushfires,
+                        ...feeds.filter(e => ![mlga, ta, morningDrive, fpf, godarchy, wall, brushfires].includes(e))
+                    ];
+                }
                 this.props.setFeeds(feeds);
             })
             .catch(handleError);
