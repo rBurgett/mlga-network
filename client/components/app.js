@@ -41,16 +41,20 @@ class App extends React.Component {
                 const godarchy = feeds.find(e => e.title.includes('GodArchy'));
                 const wall = feeds.find(e => e.title.includes('Wall'));
                 const brushfires = feeds.find(e => e.title.includes('Brushfires'));
+                const vixens = feeds.find(e => e.title.includes('Vixens'));
+                const tyfys = feeds.find(e => e.title.includes('Servers'));
                 if(mlga && ta && morningDrive && fpf && godarchy && wall && brushfires) {
                     feeds = [
                         mlga,
                         ta,
+                        vixens,
+                        tyfys,
                         morningDrive,
                         wall,
                         fpf,
                         godarchy,
                         brushfires,
-                        ...feeds.filter(e => ![mlga, ta, morningDrive, fpf, godarchy, wall, brushfires].includes(e))
+                        ...feeds.filter(e => ![mlga, ta, morningDrive, fpf, godarchy, wall, brushfires, vixens, tyfys].includes(e))
                     ];
                 }
                 this.props.setFeeds(feeds);
