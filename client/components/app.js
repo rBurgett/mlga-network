@@ -43,12 +43,14 @@ class App extends React.Component {
                 const brushfires = feeds.find(e => e.title.includes('Brushfires'));
                 const vixens = feeds.find(e => e.title.includes('Vixens'));
                 const tyfys = feeds.find(e => e.title.includes('Servers'));
+                const lesbertarian = feeds.find(e => e.title.includes('Lesbertarian'));
                 if(mlga && ta && morningDrive && fpf && godarchy && wall && brushfires) {
                     feeds = [
                         mlga,
                         ta,
                         vixens,
                         tyfys,
+                        lesbertarian,
                         morningDrive,
                         wall,
                         fpf,
