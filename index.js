@@ -231,7 +231,8 @@ const app = express()
                     Object.keys(itunes).reduce((obj, key) => {
                         obj['itunes' + key[0].toUpperCase() + key.slice(1)] = itunes[key];
                         return obj;
-                    }, {})
+                    }, {}),
+                    {date: episode.pubDate}
                 );
                 feed.addItem(preppedEpisode);
             }
