@@ -56,7 +56,7 @@ class App extends React.Component {
                         fpf,
                         godarchy,
                         brushfires,
-                        ...feeds.filter(e => ![mlga, ta, morningDrive, fpf, godarchy, wall, brushfires, vixens, tyfys].includes(e))
+                        ...feeds.filter(e => ![mlga, ta, morningDrive, fpf, godarchy, wall, brushfires, vixens, tyfys, lesbertarian].includes(e))
                     ];
                 }
                 this.props.setFeeds(feeds);

@@ -55,6 +55,7 @@
         "react"
     ],
     "globals": {
-        "$": false
+        "$": false,
+        "handleError": true
     }
 }
