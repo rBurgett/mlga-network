@@ -180,7 +180,7 @@ const app = express()
                 const preppedDocs = docs
                     .filter(d => d.enclosure ? true : false)
                     .sort((a, b) => a.isoDate === b.isoDate ? 0 : a.isoDate > b.isoDate ? -1 : 1)
-                    .slice(0, q);
+                    .slice(0, Number(q));
                 res.send(JSON.stringify(preppedDocs));
             }
         });

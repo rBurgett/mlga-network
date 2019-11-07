@@ -72,7 +72,7 @@ const Footer = ({ windowWidth, expandShows, setExpandShows }) => {
                 <a style={styles.navLink} className={'footer-link'} href={'https://itunes.apple.com/us/podcast/mlga-p%C3%B8dcast-network/id1449333590?mt=2'} target={'_blank'}><i className="fab fa-itunes-note"></i><span style={styles.linkText}> iTunes</span></a>
                 <a style={styles.navLink} className={'footer-link'} href={'/audio/rss'} target={'_blank'}><i className="fas fa-rss"></i><span style={styles.linkText}> RSS</span></a>
             </div>
-            <div style={styles.designNote}>Site designed and built by <a href="https://ryanburgett.com">Ryan Burgett</a>.</div>
+            <div style={styles.designNote}>Site designed and built by <a href="https://burgettdev.net">Burgett Dev Services LLC</a>.</div>
         </div>
     );
 };

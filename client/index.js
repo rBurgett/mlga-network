@@ -19,8 +19,8 @@ const combinedReducers = combineReducers({
 const store = createStore(combinedReducers);
 
 store.subscribe(() => {
-    const state = store.getState();
-    console.log('state', state.appState);
+    // const state = store.getState();
+    // console.log('state', state.appState);
 });
 
 window.addEventListener('resize', e => {

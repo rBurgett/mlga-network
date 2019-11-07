@@ -74,7 +74,7 @@ class App extends React.Component {
     }
 
     loadMore(e) {
-        e.preventDefault();
+        if(e) e.preventDefault();
         const newQuantity = this.props.quantity + 20;
         this.props.setQuantity(newQuantity);
         this.loadEpisodes(newQuantity);

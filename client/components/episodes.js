@@ -206,7 +206,7 @@ class Episodes extends React.Component {
                     })}
                 </div>
                 <div style={{marginBottom: 20, display: episodesToUse.length > 0 ? 'block' : 'none'}}>
-                    <button type={'button'} className={'btn btn-outline-secondary'} style={{display: 'block', margin: 'auto'}} onClick={this.props.loadMore}>Load More</button>
+                    <button type={'button'} className={'btn btn-outline-secondary'} style={{display: 'block', margin: 'auto'}} onClick={() => slug ? this.loadEpisodes(episodesToUse.length + 20, slug) : this.props.loadMore()}>Load More</button>
                 </div>
             </div>
         );
