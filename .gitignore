@@ -67,3 +67,6 @@ feeds.json
 /public2
 .env.json
 package-lock.json
+s3_logs
+/temp
+/temp2

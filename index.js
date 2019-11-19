@@ -16,6 +16,242 @@ const Feed = require('podcast');
 const { pbkdf2, generateSalt, secureUrl } = require('./modules/util');
 const ErrorHandler = require('./modules/handle-error');
 const FeedUpdater = require('./modules/feed-updater');
+const s3 = require('s3');
+// const d3 = require('d3-time-format');
+// const dynogels = require('dynogels-promisified');
+// const Joi = require('joi');
+const rmrf = require('rmrf-promise');
+const decompress = require('decompress');
+const decompressGz = require('decompress-gz');
+const moment = require('moment');
+
+class ServerLog {
+    constructor({ _id, host, date, time, isoDate, ip, method, uri }) {
+        this._id = _id;
+        this.host = host;
+        this.date = date;
+        this.isoDate = isoDate;
+        this.time = time;
+        this.ip = ip;
+        this.method = method;
+        this.uri = uri;
+    }
+}
+
+// const ServerLogModel = dynogels.define('ServerLog', {
+//     tableName: 'MLGANetworkServerLog',
+//     hashKey: 'bucket',
+//     rangeKey: 'time',
+//     timestamps: false,
+//     schema: {
+//         _id: Joi.string(),
+//         bucket: Joi.string(),
+//         time: Joi.string(),
+//         requester: Joi.string(),
+//         operation: Joi.string(),
+//         key: Joi.string()
+//     }
+// });
+
+// ServerLogModel.scan().loadAll().execAsync()
+//     .then(({ Items }) => {
+//         return Promise.all(Items.map(model => model.destroyAsync()));
+//     })
+//     .then(() => {
+//         console.log('All logs deleted.');
+//     })
+//     .catch(console.error);
+
+const tempDir = path.join(__dirname, 'temp');
+fs.ensureDirSync(tempDir);
+
+const Bucket = 'cdnlogs.mlganetwork.com';
+
+const s3Client = s3.createClient();
+
+// const parseLog = (log = '') => {
+//     const parseTime = d3.timeParse('[%d/%b/%Y:%H:%M:%S %Z]');
+//     // const logPatt = /^\w+?\s(\[.+?])\s(\d+?\.\d+?\.\d+?\.\d+?)\s(\w+?)\s(\w+?)\s(.+?)\s/;
+//     const logPatt = /^\w+?\s(.+?)\s(\[.+?])\s(\d+?\.\d+?\.\d+?\.\d+?)\s\w+?\s(\w+?)\s\w+?\.(\w+?)\.\w+?\s.+?(\/\S*?)[\s?]/;
+//     const split = log
+//         .split('\n')
+//         .map(s => s.trim())
+//         .filter(s => s)
+//         .map(l => {
+//             const matches = l.match(logPatt);
+//             if(matches) return new ServerLog({
+//                 _id: matches[4],
+//                 host: matches[1],
+//                 time: parseTime(matches[2]).toISOString(),
+//                 ip: matches[3],
+//                 method: matches[5],
+//                 uri: matches[6]
+//             });
+//             else return null;
+//         })
+//         .filter(s => s);
+//     return split;
+// };
+
+const getKeys = () => new Promise((resolve, reject) => {
+    const options = {
+        s3Params: {
+            Bucket,
+            MaxKeys: 1000
+        }
+    };
+    const stream = s3Client.listObjects(options);
+    let keys = [];
+    stream.on('data', data => keys = keys.concat(data.Contents.map(c => c.Key)));
+    stream.on('end', () => resolve(keys));
+    stream.on('error', reject);
+});
+const downloadFile = Key => new Promise((resolve, reject) => {
+    const filePath = path.join(tempDir, Key);
+    const options = {
+        localFile: filePath,
+        s3Params: {
+            Bucket,
+            Key
+        }
+    };
+    const stream = s3Client.downloadFile(options);
+    stream.on('end', () => resolve(filePath));
+    stream.on('error', reject);
+});
+// const downloadFileContents = Key => new Promise((resolve, reject) => {
+//     const options = {
+//         Bucket,
+//         Key
+//     };
+//     const stream = s3Client.downloadBuffer(options);
+//     stream.on('end', res => resolve(res.toString()));
+//     stream.on('error', reject);
+// });
+
+(async function() {
+    try {
+
+        await rmrf(tempDir);
+
+        let keys = await getKeys();
+        keys = keys.slice(0, 100);
+
+        for(let i = 0; i < keys.length; i++) {
+            console.log(`${i + 1} of ${keys.length} - ${keys[i]}`);
+            await downloadFile(keys[i]);
+        }
+        let folders = await fs.readdirAsync(tempDir);
+        folders = folders
+            .filter(f => fs.statSync(path.join(tempDir, f)).isDirectory())
+            .map(f => path.join(tempDir, f));
+
+        const tempDir2 = path.join(__dirname, 'temp2');
+
+        for(let i = 0; i < folders.length; i++) {
+            const folder = folders[i];
+
+            const files = await fs.readdirAsync(folder);
+
+            for(let j = 0; j < files.length; j++) {
+                const file = path.join(folder, files[j]);
+                await decompress(file, tempDir2, {
+                    inputFile: file,
+                    plugins: [
+                        decompressGz()
+                    ]
+                });
+            }
+
+        }
+
+        {
+            let allData = [];
+
+            const files = await fs.readdirAsync(tempDir2);
+
+            for(const file of files) {
+                const filePath = path.join(tempDir2, file);
+                const contents = await fs.readFileAsync(filePath, 'utf8');
+                const split = contents
+                    .split('\n')
+                    .map(s => s.trim())
+                    .filter(s => s);
+                const fields = split[1]
+                    .replace(/^#Fields:\s/, '')
+                    .split(/\s+/);
+                const data = split
+                    .slice(2)
+                    .map(s => s
+                        .split(/\s+/)
+                        .reduce((obj, ss, k) => {
+                            const field = fields[k];
+                            return {
+                                ...obj,
+                                [field]: ss
+                            };
+                        }, {})
+                    )
+                    .map(obj => {
+                        const { date, time } = obj;
+                        const dateObj = moment(`${date} ${time} +0000`, 'YYYY-MM-DD HH:mm:ss Z').toDate();
+                        return new ServerLog({
+                            _id: obj['x-edge-request-id'],
+                            host: obj['x-host-header'],
+                            date,
+                            time,
+                            isoDate: dateObj.toISOString(),
+                            ip: obj['c-ip'],
+                            method: obj['cs-method'],
+                            uri: obj['cs-uri-stem']
+                        });
+                    })
+                    .filter(log => {
+                        return [
+                            /^\/$/,
+                            /^\/audio\//,
+                            /^\/\d+/
+                        ].some(patt => patt.test(log.uri));
+                    });
+                allData = [...allData, data];
+            }
+
+            await fs.writeJsonAsync('logs.json', allData);
+
+        }
+
+
+        // const contentsArr = await Promise.all(keys
+        //     .map(key => downloadFileContents(key))
+        // );
+        // const logs = contentsArr
+        //     .map(log => parseLog(log))
+        //     .reduce((arr, a) => arr.concat(a), [])
+        //     // .filter(l => l.operation === 'GET');
+        // for(const log of logs) {
+        //     if(/\.mp3$/.test(log.key)) console.log(log);
+        // }
+        // for(let i = 0; i < logs.length; i++) {
+        //     console.log(`${i + 1} of ${logs.length}`);
+        //     await ServerLogModel.createAsync(logs[i]);
+        // }
+        // console.log('end', logs.length);
+        // const { Items: models } = await ServerLogModel
+            // .query('voluntaryvixens.com')
+            // .scan()
+            // .loadAll()
+            // .execAsync();
+        // const filtered = models
+        //     .map(m => new ServerLog(m.attrs))
+        //     .filter(l => /\.mp3$/.test(l.key));
+        // console.log('length', filtered.length);
+
+        console.log('Done!');
+
+    } catch(err) {
+        console.error(err);
+    }
+})();
 
 fs.ensureDirSync('public2');
 
@@ -68,10 +304,10 @@ const feeds = fs.readJsonSync('feeds.json', 'utf8');
 
 const feedUpdater = new FeedUpdater({ feeds, db });
 
-feedUpdater.update().catch(handleError);
-setInterval(() => {
-    feedUpdater.update().catch(handleError);
-}, 1800000);
+// feedUpdater.update().catch(handleError);
+// setInterval(() => {
+//     feedUpdater.update().catch(handleError);
+// }, 1800000);
 
 /************************************************
  * User Accounts Setup
