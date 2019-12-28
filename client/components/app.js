@@ -11,6 +11,7 @@ import Contact from './contact';
 import * as actions from '../actions';
 import { getWindowSize } from '../util';
 import ShowMenu from './show-menu';
+import NetworkTitle from './network-title';
 
 class App extends React.Component {
 
@@ -94,6 +95,13 @@ class App extends React.Component {
             container: {
                 flexGrow: 1,
                 overflowY: expandShows ? 'hidden' : 'scroll'
+            },
+            titleContainer: {
+                paddingTop: 5
+            },
+            title: {
+                width: 700,
+                maxWidth: '90%'
             }
         };
 
@@ -102,7 +110,9 @@ class App extends React.Component {
                 <div className={'container-fluid'}>
                     <div className={'row'}>
                         <div className={'col'}>
-                            <h1 className={'text-center'} style={{marginTop: 20, marginBottom: 20}}>{'MLGA Pødcast Network'}</h1>
+                            <div className={'d-flex flex-row justify-content-center flex-nowrap'} style={styles.titleContainer}>
+                                <NetworkTitle style={styles.title} />
+                            </div>
                         </div>
                     </div>
                     {feeds.length > 0 ?

@@ -198,8 +198,8 @@ const app = express()
                 .sort((a, b) => a.isoDate === b.isoDate ? 0 : a.isoDate > b.isoDate ? -1 : 1)
                 .slice(0, 40);
             const feed = new Feed({
-                title: 'MLGA Pødcast Network',
-                description: 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.',
+                title: 'MLGA Network',
+                description: 'The Make Liberty Great Again (MLGA) Network provides informative and entertaining content from passionate libertarian hosts.',
                 feed_url: 'https://mlganetwork.com/audio/rss',
                 site_url: 'https://mlganetwork.com',
                 image_url: 'https://mlganetwork.com/images/mlga-network-1400.jpg',
@@ -248,7 +248,7 @@ const app = express()
     .get('/', (req, res) => {
         const indexHTML = baseIndexHTML
             .replace(/{{title}}/g, 'MLGA Network')
-            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
+            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Network provides informative and entertaining content from passionate libertarian hosts.')
             .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
             .replace(/{{imageWidth}}/g, '1024')
             .replace(/{{imageHeight}}/g, '1024')
@@ -258,7 +258,7 @@ const app = express()
     .get('/about', (req, res) => {
         const indexHTML = baseIndexHTML
             .replace(/{{title}}/g, 'About - MLGA Network')
-            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
+            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Network provides informative and entertaining content from passionate libertarian hosts.')
             .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
             .replace(/{{imageWidth}}/g, '1024')
             .replace(/{{imageHeight}}/g, '1024')
@@ -268,7 +268,7 @@ const app = express()
     .get('/contact', (req, res) => {
         const indexHTML = baseIndexHTML
             .replace(/{{title}}/g, 'Contact - MLGA Network')
-            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.')
+            .replace(/{{description}}/g, 'The Make Liberty Great Again (MLGA) Network provides informative and entertaining content from passionate libertarian hosts.')
             .replace(/{{image}}/g, 'https://mlganetwork.com/images/mlga-network.jpg')
             .replace(/{{imageWidth}}/g, '1024')
             .replace(/{{imageHeight}}/g, '1024')
@@ -283,8 +283,8 @@ const app = express()
                 res.sendStatus(500);
             } else if(feed) {
                 const indexHTML = baseIndexHTML
-                    .replace(/{{title}}/g, escape(feed.title + ' on MLGA Pødcast Network'))
-                    .replace(/{{description}}/g, escape(`Listen to ${feed.title} on the MLGA Pødcast Network.`))
+                    .replace(/{{title}}/g, escape(feed.title + ' on MLGA Network'))
+                    .replace(/{{description}}/g, escape(`Listen to ${feed.title} on the MLGA Network.`))
                     .replace(/{{image}}/g, secureUrl(feed.image.url))
                     .replace(/{{imageWidth}}/g, '')
                     .replace(/{{imageHeight}}/g, '')

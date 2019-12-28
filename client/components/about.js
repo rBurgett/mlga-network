@@ -10,7 +10,7 @@ const About = () => {
             </div>
             <div className={'row'}>
                 <div className={'col'}>
-                    <p>{'The Make Liberty Great Again (MLGA) Pødcast Network provides informative and entertaining content from passionate libertarian hosts.'}</p>
+                    <p>{'The Make Liberty Great Again (MLGA) Network provides informative and entertaining content from passionate libertarian hosts.'}</p>
                 </div>
             </div>
         </div>
